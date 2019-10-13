@@ -7,10 +7,6 @@ ccgo::Optimizer::Optimizer() {
 ccgo::Optimizer::~Optimizer() {
 }
 
-bool ccgo::Optimizer::opt() {
-  return false;
-}
-
 long ccgo::Optimizer::getN() const {
   return _n;
 }
@@ -123,6 +119,7 @@ void ccgo::Optimizer::enableConstraint(const std::string& name) {
       it->second->enable();
     }
   } else {
+    // TODO: exception
   }
 }
 
@@ -133,5 +130,34 @@ void ccgo::Optimizer::disableConstraint(const std::string& name) {
       it->second->disable();
     }
   } else {
+    // TODO: exception
   }
+}
+
+void ccgo::Optimizer::enableTarget(const std::string& name) {
+  auto it = _targets.find(name);
+  if (it != _targets.end()) {
+    if (!it->second->isEnabled()) {
+      it->second->enable();
+      // TODO : disable some of corresponding constraints
+    }
+  } else {
+    // TODO: exception
+  }
+}
+
+void ccgo::Optimizer::disableTarget(const std::string& name) {
+  auto it = _targets.find(name);
+  if (it != _targets.end()) {
+    if (it->second->isEnabled()) {
+      it->second->disable();
+      // TODO: ? enable some of corresponding constraints
+    }
+  } else {
+    // TODO: exception
+  }
+}
+
+bool ccgo::Optimizer::optimize() {
+  return false;
 }

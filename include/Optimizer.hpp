@@ -8,7 +8,6 @@ namespace ccgo {
   public:
     Optimizer();
     virtual ~Optimizer();
-    bool opt();
     long getN() const;
     long getNTotal() const;
     const Eigen::VectorXd& getInitialParameters(const std::string&) const;
@@ -21,6 +20,7 @@ namespace ccgo {
     void disableConstraint(const std::string&);
     void enableTarget(const std::string&);
     void disableTarget(const std::string&);
+    bool optimize();
   private:
     long _n;
     long _nTotal;
