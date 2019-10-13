@@ -37,7 +37,7 @@ void ccgo::TargetFunction::setInitialParameters(const Eigen::VectorXd& x) {
   }
 }
 
-void ccgo::TargetFunction::setBeginIndex(const std::size_t& index) {
+void ccgo::TargetFunction::setBeginIndex(const long& index) {
   _beginIndex = index;
 }
 

@@ -16,7 +16,7 @@ namespace ccgo {
     Eigen::VectorXd df(const Eigen::VectorXd&) const;
     Eigen::MatrixXd d2f(const Eigen::VectorXd&) const;
     void setInitialParameters(const Eigen::VectorXd&);
-    void setBeginIndex(const std::size_t&); // !!! temp
+    void setBeginIndex(const long&); // !!! temp
   protected:
     virtual double ownf(const Eigen::VectorXd&) const = 0;
     virtual Eigen::VectorXd owndf(const Eigen::VectorXd&) const = 0;
