@@ -1,10 +1,14 @@
 #include <utility>
 #include <iostream>
+#include <math.h>
 #include "NameException.hpp"
 #include "Optimizer.hpp"
 
 ccgo::Optimizer::Optimizer():
-  _n(0), _nTotal(0) {
+  _n(0), _nTotal(0),
+  _nIter(100), _nIterLS(1000),
+  _tol(1.e-6), _tolLS(1.e-6),
+  beta(ccgo::Optimizer::betaByName(ccgo::FLETCHER_REEVES)) {
 }
 
 ccgo::Optimizer::~Optimizer() {
@@ -42,10 +46,10 @@ const Eigen::VectorXd& ccgo::Optimizer::getFinalParameters(const std::string& na
 void ccgo::Optimizer::addTarget(TargetFunction* obj) noexcept(false) {
   if (_targets.find(obj->getName()) == _targets.end()) {
     _targets.insert(std::make_pair(obj->getName(), obj));
-    obj->setBeginIndex(_n);
-    _n += obj->getN();
-    _nTotal += obj->getN();
-    incLambdaIndexes(obj->getN());
+    // obj->setBeginIndex(_n);
+    // _n += obj->getN();
+    // _nTotal += obj->getN();
+    // incLambdaIndexes(obj->getN());
   } else {
     ccgo::NameException<TargetFunction> e(obj->getName());
     std::cerr << e.what() << std::endl;
@@ -56,8 +60,8 @@ void ccgo::Optimizer::addTarget(TargetFunction* obj) noexcept(false) {
 void ccgo::Optimizer::addConstraint(Constraint* obj) noexcept(false) {
   if (_constraints.find(obj->getName()) == _constraints.end()) {
     _constraints.insert(std::make_pair(obj->getName(), obj));
-    obj->setLambdaIndex(_nTotal);
-    _nTotal += 1;
+    // obj->setLambdaIndex(_nTotal);
+    // _nTotal += 1;
   } else {
     ccgo::NameException<ccgo::Constraint> e(obj->getName());
     std::cerr << e.what() << std::endl;
@@ -201,8 +205,40 @@ void ccgo::Optimizer::disableTarget(const std::string& name) noexcept(false) {
   }
 }
 
-bool ccgo::Optimizer::optimize() {
-  return false;
+int ccgo::Optimizer::optimize() {
+  int lsflag;
+  double w;
+  double lam;
+  Eigen::VectorXd x = getInitialParamVector();
+  Eigen::VectorXd xp;
+  Eigen::VectorXd dx;
+  Eigen::VectorXd ag;
+  Eigen::VectorXd agp;
+  Eigen::VectorXd s;
+  for (int k = 0; k < _nIter; ++k) {
+    agp = -df(x);
+    s = agp;
+    for (int j = 0; j < _nIter; ++j) {
+      xp = x;
+      lam = 0;
+      lsflag = lsearch(x, s, &lam);
+      x += lam * s;
+      ag = -df(x);
+      if (lsflag) {
+	w = 0;
+      } else {
+	w = beta(agp, ag, s);
+      }
+      s = ag + w * s;
+      agp = ag;
+      dx = x - xp;
+      if (s.transpose() * s < _tol ||
+	  dx.transpose() * dx < _tol) {
+	return 0;
+      }
+    }
+  }
+  return 1;
 }
 
 void ccgo::Optimizer::incLambdaIndexes(const long& n) {
@@ -226,5 +262,88 @@ void ccgo::Optimizer::decLambdaIndexesByOne(const long& index) {
     if (el.second->isEnabled() && el.second->getLambdaIndex() > index) {
       el.second->setLambdaIndex(el.second->getLambdaIndex() - 1);
     }
+  }
+}
+
+Eigen::VectorXd ccgo::Optimizer::getInitialParamVector() const {
+  Eigen::VectorXd result(_nTotal);
+  for (const auto& el : _targets) {
+    if (el.second->isEnabled()) {
+      result.block(el.second->getBeginIndex(), 0, el.second->getEndIndex(), 1) =
+	el.second->getInitialParameters();
+    } 
+  }
+  for (const auto& el : _constraints) {
+    if (el.second->isEnabled()) {
+      result(el.second->getLambdaIndex()) = el.second->getLambdaInitial();
+    }
+  }
+  return result;
+}
+
+int ccgo::Optimizer::lsearch(const Eigen::VectorXd& x, const Eigen::VectorXd& s, double* lam) const {
+  if (s.transpose() * s == 0) {
+    return 0;
+  }
+  double up;
+  double down;
+  double del;
+  Eigen::VectorXd dfVec;
+  for (int i = 0; i < _nIterLS; ++i) {
+    dfVec = df(x + (*lam) * s);
+    if (dfVec.transpose() * dfVec == 0) {
+      return 0;
+    }
+    up = s.transpose() * dfVec;
+    down = s.transpose() * d2f(x + (*lam) * s) * s;
+    del = up / down;
+    *lam -= del;
+    if (fabs(del) < _tolLS) {
+      return 0;
+    }
+  }
+  return 1;
+}
+
+double ccgo::Optimizer::beta_FLETCHER_REEVES(const Eigen::VectorXd& dxp,
+					     const Eigen::VectorXd& dx,
+					     const Eigen::VectorXd& sp) {
+  return ((double)(dx.transpose() * dx)) / ((double)(dxp.transpose() * dxp));
+}
+
+double ccgo::Optimizer::beta_POLAK_RIBIERE(const Eigen::VectorXd& dxp,
+					   const Eigen::VectorXd& dx,
+					   const Eigen::VectorXd& sp) {
+ double res = ((double)(dx.transpose() * (dx - dxp))) /
+    ((double)(dxp.transpose() * dxp));
+ return std::max(0., res);
+}
+
+double ccgo::Optimizer::beta_HESTENES_STIEFEL(const Eigen::VectorXd& dxp,
+					      const Eigen::VectorXd& dx,
+					      const Eigen::VectorXd& sp) {
+  double res =  -((double)(dx.transpose() * (dx - dxp))) / ((double)(sp.transpose() * (dx - dxp)));
+  return std::max(0., res);
+}
+
+double ccgo::Optimizer::beta_DAI_YUAN(const Eigen::VectorXd& dxp,
+				      const Eigen::VectorXd& dx,
+				      const Eigen::VectorXd& sp) {
+  double res = -((double)(dx.transpose() * dx)) / ((double)(sp.transpose() * (dx - dxp)));
+  return std::max(0., res);
+}
+
+ccgo::BetaWT ccgo::Optimizer::betaByName(const ccgo::STEP_WT& name) {
+  switch (name) {
+  case ccgo::FLETCHER_REEVES:
+    return &ccgo::Optimizer::beta_FLETCHER_REEVES;
+  case ccgo::POLAK_RIBIERE:
+    return &ccgo::Optimizer::beta_POLAK_RIBIERE;
+  case ccgo::HESTENES_STIEFEL:
+    return &ccgo::Optimizer::beta_HESTENES_STIEFEL;
+  case ccgo::DAI_YUAN:
+    return &ccgo::Optimizer::beta_DAI_YUAN;
+  default:
+    return &ccgo::Optimizer::beta_DAI_YUAN;
   }
 }

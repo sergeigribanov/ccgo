@@ -42,21 +42,19 @@ void ccgo::TargetFunction::setBeginIndex(const long& index) {
 }
 
 double ccgo::TargetFunction::f(const Eigen::VectorXd& x) const {
-  return ownf(x.block(getBeginIndex(), 0, getEndIndex(), 1));
+  return ownf(x.block(getBeginIndex(), 0, getN(), 1));
 }
 
 Eigen::VectorXd ccgo::TargetFunction::df(const Eigen::VectorXd& x) const {
   Eigen::VectorXd result(x.size());
-  long eI = getEndIndex();
-  result.block(getBeginIndex(), 0, eI, 1) =
-    owndf(x.block(getBeginIndex(), 0, eI, 1));
+  result.block(getBeginIndex(), 0, getN(), 1) =
+    owndf(x.block(getBeginIndex(), 0, getN(), 1));
   return result;
 }
 
 Eigen::MatrixXd ccgo::TargetFunction::d2f(const Eigen::VectorXd& x) const {
   Eigen::MatrixXd result(x.size(), x.size());
-  long eI = getEndIndex();
-  result.block(getBeginIndex(), getBeginIndex(), eI, eI) =
-    ownd2f(x.block(getBeginIndex(), 0, eI, 1));
+  result.block(getBeginIndex(), getBeginIndex(), getN(), getN()) =
+    ownd2f(x.block(getBeginIndex(), 0, getN(), 1));
   return result;
 }

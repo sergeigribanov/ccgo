@@ -1,4 +1,5 @@
 #include <utility>
+#include <iostream>
 #include "Constraint.hpp"
 
 ccgo::Constraint::Constraint(const std::string& name) :
@@ -44,10 +45,9 @@ Eigen::VectorXd ccgo::Constraint::df(const Eigen::VectorXd& x) const {
 Eigen::MatrixXd ccgo::Constraint::d2f(const Eigen::VectorXd& x) const {
   Eigen::MatrixXd result(x.size(), x.size());
   const long li = getLambdaIndex();
-  const long lip = li + 1;
   result = x(li) * d2h(x);
-  result.block(0, li, x.size(), lip) = dh(x);
-  result.block(li, 0, lip, x.size()) = result.block(0, li, x.size(), lip).transpose();
+  result.block(0, li, x.size(), 1) = dh(x);
+  result.block(li, 0, 1, x.size()) = result.block(0, li, x.size(), 1).transpose();
   result(li, li) = 0;
   return result;
 }
