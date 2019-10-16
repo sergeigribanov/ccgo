@@ -4,8 +4,8 @@
 
 ccgo::Constraint::Constraint(const std::string& name) :
   Function(name),
-  _lambdaInitial(1),
-  _lambdaFinal(1) {
+  _lambdaInitial(2),
+  _lambdaFinal(2) {
 }
 
 ccgo::Constraint::~Constraint() {
@@ -58,4 +58,8 @@ void ccgo::Constraint::add(const TargetFunction* obj) {
   } else {
     // TODO: exception
   }
+}
+
+void ccgo::Constraint::setLambdaFinal(const Eigen::VectorXd& x) {
+  _lambdaFinal = x(getLambdaIndex());
 }

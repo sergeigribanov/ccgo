@@ -1,3 +1,4 @@
+#include <iostream>
 #include "TargetChiSquare.hpp"
 
 ccgo::TargetChiSquare::TargetChiSquare(const std::string& name, const long& n):
@@ -30,6 +31,7 @@ void ccgo::TargetChiSquare::setInverseErrorMatrix(const Eigen::MatrixXd& matrix)
   if (matrix.rows() == matrix.cols() && matrix.rows() == getN()) {
     _inverseErrorMatrix = matrix;
   } else {
+    std::cerr << "[ERROR] Wrong matrix size!" << std::endl;
     // TODO: exception
   }
 }

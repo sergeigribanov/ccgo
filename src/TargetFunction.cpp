@@ -58,3 +58,7 @@ Eigen::MatrixXd ccgo::TargetFunction::d2f(const Eigen::VectorXd& x) const {
     ownd2f(x.block(getBeginIndex(), 0, getN(), 1));
   return result;
 }
+
+void ccgo::TargetFunction::setFinalParameters(const Eigen::VectorXd& x) {
+  _xFinal = x.block(getBeginIndex(), 0, getN(), 1);
+}

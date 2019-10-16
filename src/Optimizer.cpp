@@ -7,7 +7,7 @@
 ccgo::Optimizer::Optimizer():
   _n(0), _nTotal(0),
   _nIter(100), _nIterLS(1000),
-  _tol(1.e-6), _tolLS(1.e-6),
+  _tol(1.e-12), _tolLS(1.e-12),
   beta(ccgo::Optimizer::betaByName(ccgo::FLETCHER_REEVES)) {
 }
 
@@ -232,12 +232,13 @@ int ccgo::Optimizer::optimize() {
       s = ag + w * s;
       agp = ag;
       dx = x - xp;
-      if (s.transpose() * s < _tol ||
-	  dx.transpose() * dx < _tol) {
+      if (s.transpose() * s < _tol || dx.transpose() * dx < _tol) {
+	setFinalParameters(x);
 	return 0;
       }
     }
   }
+  setFinalParameters(x);
   return 1;
 }
 
@@ -295,7 +296,8 @@ int ccgo::Optimizer::lsearch(const Eigen::VectorXd& x, const Eigen::VectorXd& s,
       return 0;
     }
     up = s.transpose() * dfVec;
-    down = s.transpose() * d2f(x + (*lam) * s) * s;
+    Eigen::MatrixXd d2fM = d2f(x + (*lam) * s);
+    down = s.transpose() * d2fM * s;
     del = up / down;
     *lam -= del;
     if (fabs(del) < _tolLS) {
@@ -345,5 +347,18 @@ ccgo::BetaWT ccgo::Optimizer::betaByName(const ccgo::STEP_WT& name) {
     return &ccgo::Optimizer::beta_DAI_YUAN;
   default:
     return &ccgo::Optimizer::beta_DAI_YUAN;
+  }
+}
+
+void ccgo::Optimizer::setFinalParameters(const Eigen::VectorXd& x) {
+  for (auto& el : _targets) {
+    if (el.second->isEnabled()) {
+      el.second->setFinalParameters(x);
+    }
+  }
+  for (auto& el : _constraints) {
+    if (el.second->isEnabled()) {
+      el.second->setLambdaFinal(x);
+    }
   }
 }

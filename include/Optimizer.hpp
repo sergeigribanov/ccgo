@@ -22,6 +22,7 @@ namespace ccgo {
     void disableConstraint(const std::string&) noexcept(false);
     void enableTarget(const std::string&) noexcept(false);
     void disableTarget(const std::string&) noexcept(false);
+    void setFinalParameters(const Eigen::VectorXd&);
     int optimize();
   private:
     double f(const Eigen::VectorXd&) const;
