@@ -5,7 +5,7 @@
 
 int main(int argc, char* argv[]) {
   ccgo::TargetChiSquare q("q", 2);
-  ccgo::TestConstraint tc("tc", 2.);
+  ccgo::TestConstraint tc("tc", 2);
   ccgo::Optimizer opt;
   opt.addTarget(&q);
   opt.addConstraint(&tc);

@@ -6,8 +6,8 @@
 
 ccgo::Optimizer::Optimizer():
   _n(0), _nTotal(0),
-  _nIter(100), _nIterLS(1000),
-  _tol(1.e-12), _tolLS(1.e-12),
+  _nIter(100), _nIterLS(100),
+  _tol(1.e-11), _tolLS(1.e-11),
   beta(ccgo::Optimizer::betaByName(ccgo::FLETCHER_REEVES)) {
 }
 
