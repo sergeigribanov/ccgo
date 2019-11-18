@@ -9,9 +9,9 @@ namespace ccgo {
     virtual ~TestConstraint();
     double getA() const;
   protected:
-    double h(const Eigen::VectorXd&) const;
-    Eigen::VectorXd dh(const Eigen::VectorXd&) const;
-    Eigen::MatrixXd d2h(const Eigen::VectorXd&) const;
+    virtual double h(const Eigen::VectorXd&) const override final;
+    virtual Eigen::VectorXd dh(const Eigen::VectorXd&) const override final;
+    virtual Eigen::MatrixXd d2h(const Eigen::VectorXd&) const override final;
   private:
     double _a;
   };

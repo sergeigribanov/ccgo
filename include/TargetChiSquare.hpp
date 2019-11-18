@@ -13,8 +13,8 @@ namespace ccgo {
     virtual void onFitEnd(const Eigen::VectorXd&) override;
   protected:
     double ownf(const Eigen::VectorXd&) const;
-    Eigen::VectorXd owndf(const Eigen::VectorXd&) const;
-    Eigen::MatrixXd ownd2f(const Eigen::VectorXd&) const;
+    virtual Eigen::VectorXd owndf(const Eigen::VectorXd&) const override final;
+    virtual Eigen::MatrixXd ownd2f(const Eigen::VectorXd&) const override final;
   private:
     Eigen::MatrixXd _inverseErrorMatrix;
   };
