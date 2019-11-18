@@ -18,7 +18,7 @@ namespace ccgo {
     void setLambdaIndex(const long&);
     void setLambdaInitial(const double&);
     void setLambdaFinal(const Eigen::VectorXd&);
-    void add(const TargetFunction*);
+    virtual void add(const TargetFunction*);
   protected:
     std::unordered_map<std::string, const TargetFunction*> _targets;
     virtual double h(const Eigen::VectorXd&) const = 0;
