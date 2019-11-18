@@ -210,6 +210,7 @@ int ccgo::Optimizer::optimize() {
   double w;
   double lam;
   Eigen::VectorXd x = getInitialParamVector();
+  onFitBegin(x);
   Eigen::VectorXd xp;
   Eigen::VectorXd dx;
   Eigen::VectorXd ag;
@@ -239,7 +240,24 @@ int ccgo::Optimizer::optimize() {
     }
   }
   setFinalParameters(x);
+  onFitEnd(x);
   return 1;
+}
+
+void ccgo::Optimizer::onFitBegin(const Eigen::VectorXd& x) {
+  for (auto& el : _targets) {
+    if (el.second->isEnabled()) {
+      el.second->onFitBegin(x);
+    }
+  }
+}
+
+void ccgo::Optimizer::onFitEnd(const Eigen::VectorXd& x) {
+  for (auto& el : _targets) {
+    if (el.second->isEnabled()) {
+      el.second->onFitEnd(x);
+    }
+  }
 }
 
 void ccgo::Optimizer::incLambdaIndexes(const long& n) {

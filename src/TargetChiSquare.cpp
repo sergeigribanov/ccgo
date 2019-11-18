@@ -35,3 +35,9 @@ void ccgo::TargetChiSquare::setInverseErrorMatrix(const Eigen::MatrixXd& matrix)
     // TODO: exception
   }
 }
+
+void ccgo::TargetChiSquare::onFitBegin(const Eigen::VectorXd&) {
+}
+
+void ccgo::TargetChiSquare::onFitEnd(const Eigen::VectorXd&) {
+}

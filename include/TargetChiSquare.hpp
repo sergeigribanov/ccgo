@@ -9,6 +9,8 @@ namespace ccgo {
     virtual ~TargetChiSquare();
     const Eigen::MatrixXd& getInverseErrorMatrix() const;
     void setInverseErrorMatrix(const Eigen::MatrixXd&);
+    virtual void onFitBegin(const Eigen::VectorXd&) override;
+    virtual void onFitEnd(const Eigen::VectorXd&) override;
   protected:
     double ownf(const Eigen::VectorXd&) const;
     Eigen::VectorXd owndf(const Eigen::VectorXd&) const;

@@ -33,6 +33,8 @@ namespace ccgo {
     void decLambdaIndexesByOne(const long&);
     Eigen::VectorXd getInitialParamVector() const;
     int lsearch(const Eigen::VectorXd&, const Eigen::VectorXd&, double*) const;
+    void onFitBegin(const Eigen::VectorXd&);
+    void onFitEnd(const Eigen::VectorXd&);
     long _n;
     long _nTotal;
     int _nIter;

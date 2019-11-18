@@ -18,6 +18,8 @@ namespace ccgo {
     void setInitialParameters(const Eigen::VectorXd&);
     void setBeginIndex(const long&);
     void setFinalParameters(const Eigen::VectorXd&);
+    virtual void onFitBegin(const Eigen::VectorXd&) = 0;
+    virtual void onFitEnd(const Eigen::VectorXd&) = 0;
   protected:
     virtual double ownf(const Eigen::VectorXd&) const = 0;
     virtual Eigen::VectorXd owndf(const Eigen::VectorXd&) const = 0;
