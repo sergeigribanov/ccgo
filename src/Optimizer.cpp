@@ -288,7 +288,7 @@ Eigen::VectorXd ccgo::Optimizer::getInitialParamVector() const {
   Eigen::VectorXd result(_nTotal);
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
-      result.block(el.second->getBeginIndex(), 0, el.second->getEndIndex(), 1) =
+      result.block(el.second->getBeginIndex(), 0, el.second->getN(), 1) =
 	el.second->getInitialParameters();
     } 
   }
