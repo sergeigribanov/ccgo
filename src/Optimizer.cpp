@@ -7,8 +7,8 @@
 ccgo::Optimizer::Optimizer():
   _n(0), _nTotal(0),
   _nIter(100), _nIterLS(100),
-  _tol(1.e-11), _tolLS(1.e-11),
-  beta(ccgo::Optimizer::betaByName(ccgo::FLETCHER_REEVES)) {
+  _tol(1.e-6), _tolLS(1.e-6),
+  beta(ccgo::Optimizer::betaByName(ccgo::DAI_YUAN)) {
 }
 
 ccgo::Optimizer::~Optimizer() {
@@ -46,10 +46,6 @@ const Eigen::VectorXd& ccgo::Optimizer::getFinalParameters(const std::string& na
 void ccgo::Optimizer::addTarget(TargetFunction* obj) noexcept(false) {
   if (_targets.find(obj->getName()) == _targets.end()) {
     _targets.insert(std::make_pair(obj->getName(), obj));
-    // obj->setBeginIndex(_n);
-    // _n += obj->getN();
-    // _nTotal += obj->getN();
-    // incLambdaIndexes(obj->getN());
   } else {
     ccgo::NameException<TargetFunction> e(obj->getName());
     std::cerr << e.what() << std::endl;
@@ -60,8 +56,6 @@ void ccgo::Optimizer::addTarget(TargetFunction* obj) noexcept(false) {
 void ccgo::Optimizer::addConstraint(Constraint* obj) noexcept(false) {
   if (_constraints.find(obj->getName()) == _constraints.end()) {
     _constraints.insert(std::make_pair(obj->getName(), obj));
-    // obj->setLambdaIndex(_nTotal);
-    // _nTotal += 1;
   } else {
     ccgo::NameException<ccgo::Constraint> e(obj->getName());
     std::cerr << e.what() << std::endl;
@@ -205,6 +199,49 @@ void ccgo::Optimizer::disableTarget(const std::string& name) noexcept(false) {
   }
 }
 
+// int ccgo::Optimizer::optimize() {
+//   int lsflag;
+//   double w;
+//   double lam;
+//   Eigen::VectorXd x = getInitialParamVector();
+//   onFitBegin(x);
+//   Eigen::VectorXd xp;
+//   Eigen::VectorXd dx;
+//   Eigen::VectorXd ag;
+//   Eigen::VectorXd agp;
+//   Eigen::VectorXd s;
+//   for (int k = 0; k < _nIter; ++k) {
+//     agp = -df(x);
+//     s = agp;
+//     for (int j = 0; j < _nIter; ++j) {
+//       xp = x;
+//       lam = 0;
+//       lsflag = lsearch(x, s, &lam);
+//       x += lam * s;
+//       ag = -df(x);
+//       if (lsflag) {
+// 	w = 0;
+//       } else {
+// 	w = beta(agp, ag, s);
+//       }
+//       s = ag + w * s;
+//       agp = ag;
+//       dx = x - xp;
+//       if (fabs(f(x) - f(xp)) < _tol) {
+// 	// s.transpose() * s < _tol || dx.transpose() * dx < _tol
+// 	setFinalParameters(x);
+// 	onFitEnd(x);
+// 	_finalX = x;
+// 	return 0;
+//       }
+//     }
+//   }
+//   setFinalParameters(x);
+//   onFitEnd(x);
+//   _finalX = x;
+//   return 1;
+// }
+
 int ccgo::Optimizer::optimize() {
   int lsflag;
   double w;
@@ -212,36 +249,40 @@ int ccgo::Optimizer::optimize() {
   Eigen::VectorXd x = getInitialParamVector();
   onFitBegin(x);
   Eigen::VectorXd xp;
-  Eigen::VectorXd dx;
   Eigen::VectorXd ag;
   Eigen::VectorXd agp;
   Eigen::VectorXd s;
-  for (int k = 0; k < _nIter; ++k) {
-    agp = -df(x);
-    s = agp;
-    for (int j = 0; j < _nIter; ++j) {
-      xp = x;
-      lam = 0;
-      lsflag = lsearch(x, s, &lam);
-      x += lam * s;
-      ag = -df(x);
-      if (lsflag) {
-	w = 0;
-      } else {
-	w = beta(agp, ag, s);
-      }
-      s = ag + w * s;
-      agp = ag;
-      dx = x - xp;
-      if (s.transpose() * s < _tol || dx.transpose() * dx < _tol) {
-	setFinalParameters(x);
-	return 0;
-      }
+  agp = -df(x);
+  s = agp;
+  for (int j = 0; j < _nIter; ++j) {
+    lam = 0;
+    lsflag = lsearch(x, s, &lam);
+    std::cout << "lsflag = " << lsflag << std::endl;
+    xp = x;
+    x += lam * s;
+    ag = -df(x);
+    if (lsflag) {
+      w = 0;
+    } else {
+      w = beta(agp, ag, s);
+    }
+    s = ag + w * s;
+    agp = ag;
+    if (fabs(f(x) - f(xp)) < _tol) {
+      setFinalParameters(x);
+      onFitEnd(x);
+      _finalX = x;
+      return 0;
     }
   }
   setFinalParameters(x);
   onFitEnd(x);
+  _finalX = x;
   return 1;
+}
+
+const Eigen::VectorXd& ccgo::Optimizer::getFinalParameters() const {
+  return _finalX;
 }
 
 void ccgo::Optimizer::onFitBegin(const Eigen::VectorXd& x) {
@@ -307,6 +348,7 @@ int ccgo::Optimizer::lsearch(const Eigen::VectorXd& x, const Eigen::VectorXd& s,
   double up;
   double down;
   double del;
+  double plam;
   Eigen::VectorXd dfVec;
   for (int i = 0; i < _nIterLS; ++i) {
     dfVec = df(x + (*lam) * s);
@@ -317,8 +359,9 @@ int ccgo::Optimizer::lsearch(const Eigen::VectorXd& x, const Eigen::VectorXd& s,
     Eigen::MatrixXd d2fM = d2f(x + (*lam) * s);
     down = s.transpose() * d2fM * s;
     del = up / down;
+    plam = *lam;
     *lam -= del;
-    if (fabs(del) < _tolLS) {
+    if (fabs(f(x + plam * s) - f(x + (*lam) * s)) < _tolLS) {
       return 0;
     }
   }

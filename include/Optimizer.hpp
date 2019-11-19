@@ -24,9 +24,10 @@ namespace ccgo {
     void disableTarget(const std::string&) noexcept(false);
     void setFinalParameters(const Eigen::VectorXd&);
     int optimize();
-  private:
     double f(const Eigen::VectorXd&) const;
     Eigen::VectorXd df(const Eigen::VectorXd&) const;
+    const Eigen::VectorXd& getFinalParameters() const;
+  private:
     Eigen::MatrixXd d2f(const Eigen::VectorXd&) const;
     void incLambdaIndexes(const long&);
     void decLambdaIndexes(const long&);
@@ -49,6 +50,7 @@ namespace ccgo {
     static BetaWT betaByName(const STEP_WT&);
     std::unordered_map<std::string, TargetFunction*> _targets;
     std::unordered_map<std::string, Constraint*> _constraints;
+    Eigen::VectorXd _finalX;
   };
 }
 
