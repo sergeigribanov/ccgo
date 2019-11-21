@@ -2,8 +2,8 @@
 
 ccgo::TargetFunction::TargetFunction(const std::string& name, const long& n) :
   Function(name),
-  _xInitial(Eigen::VectorXd(n)),
-  _xFinal(Eigen::VectorXd(n)) {
+  _xInitial(Eigen::VectorXd::Zero(n)),
+  _xFinal(Eigen::VectorXd::Zero(n)) {
 }
 
 ccgo::TargetFunction::~TargetFunction() {
@@ -46,14 +46,14 @@ double ccgo::TargetFunction::f(const Eigen::VectorXd& x) const {
 }
 
 Eigen::VectorXd ccgo::TargetFunction::df(const Eigen::VectorXd& x) const {
-  Eigen::VectorXd result(x.size());
+  Eigen::VectorXd result = Eigen::VectorXd::Zero(x.size());
   result.block(getBeginIndex(), 0, getN(), 1) =
     owndf(x.block(getBeginIndex(), 0, getN(), 1));
   return result;
 }
 
 Eigen::MatrixXd ccgo::TargetFunction::d2f(const Eigen::VectorXd& x) const {
-  Eigen::MatrixXd result(x.size(), x.size());
+  Eigen::MatrixXd result = Eigen::MatrixXd::Zero(x.size(), x.size());
   result.block(getBeginIndex(), getBeginIndex(), getN(), getN()) =
     ownd2f(x.block(getBeginIndex(), 0, getN(), 1));
   return result;

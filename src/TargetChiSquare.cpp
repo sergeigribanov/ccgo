@@ -2,7 +2,7 @@
 #include "TargetChiSquare.hpp"
 
 ccgo::TargetChiSquare::TargetChiSquare(const std::string& name, const long& n):
-  TargetFunction(name, n), _inverseErrorMatrix(Eigen::MatrixXd(n, n)) {
+  TargetFunction(name, n), _inverseErrorMatrix(Eigen::MatrixXd::Zero(n, n)) {
 }
 
 ccgo::TargetChiSquare::~TargetChiSquare() {

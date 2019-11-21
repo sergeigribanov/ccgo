@@ -36,14 +36,14 @@ double ccgo::Constraint::f(const Eigen::VectorXd& x) const {
 }
 
 Eigen::VectorXd ccgo::Constraint::df(const Eigen::VectorXd& x) const {
-  Eigen::VectorXd result(x.size());
+  Eigen::VectorXd result = Eigen::VectorXd::Zero(x.size());
   result = x(getLambdaIndex()) * dh(x);
   result(getLambdaIndex()) = h(x);
   return result; 
 }
 
 Eigen::MatrixXd ccgo::Constraint::d2f(const Eigen::VectorXd& x) const {
-  Eigen::MatrixXd result(x.size(), x.size());
+  Eigen::MatrixXd result = Eigen::MatrixXd::Zero(x.size(), x.size());
   const long li = getLambdaIndex();
   result = x(li) * d2h(x);
   result.block(0, li, x.size(), 1) = dh(x);

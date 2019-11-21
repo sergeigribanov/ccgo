@@ -21,11 +21,11 @@ double ccgo::TestConstraint::h(const Eigen::VectorXd& x) const {
 Eigen::VectorXd ccgo::TestConstraint::dh(const Eigen::VectorXd& x) const {
   auto it = _targets.begin();
   long bi = (*it).second->getBeginIndex();
-  Eigen::VectorXd result(x.size());
+  Eigen::VectorXd result = Eigen::VectorXd::Zero(x.size());
   result(bi) = 1;
   return result;
 }
 
 Eigen::MatrixXd ccgo::TestConstraint::d2h(const Eigen::VectorXd& x) const {
-  return Eigen::MatrixXd(x.size(), x.size());
+  return Eigen::MatrixXd::Zero(x.size(), x.size());
 }

@@ -6,9 +6,7 @@
 
 ccgo::Optimizer::Optimizer():
   _n(0), _nTotal(0),
-  _nIter(100), _nIterLS(100),
-  _tol(1.e-6), _tolLS(1.e-6),
-  beta(ccgo::Optimizer::betaByName(ccgo::DAI_YUAN)) {
+  _nIter(100), _tol(1.e-9) {
 }
 
 ccgo::Optimizer::~Optimizer() {
@@ -100,14 +98,14 @@ double ccgo::Optimizer::f(const Eigen::VectorXd& x) const {
   }
   for (const auto& el : _constraints) {
     if (el.second->isEnabled()) {
-    result += el.second->f(x);
+      result += el.second->f(x);
     }
   }
   return result;
 }
 
 Eigen::VectorXd ccgo::Optimizer::df(const Eigen::VectorXd& x) const {
-  Eigen::VectorXd result(_nTotal);
+  Eigen::VectorXd result = Eigen::VectorXd::Zero(_nTotal);
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
       result += el.second->df(x);
@@ -122,7 +120,7 @@ Eigen::VectorXd ccgo::Optimizer::df(const Eigen::VectorXd& x) const {
 }
 
 Eigen::MatrixXd ccgo::Optimizer::d2f(const Eigen::VectorXd& x) const {
-  Eigen::MatrixXd result(_nTotal, _nTotal);
+  Eigen::MatrixXd result = Eigen::MatrixXd::Zero(_nTotal, _nTotal);
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
       result += el.second->d2f(x);
@@ -199,90 +197,20 @@ void ccgo::Optimizer::disableTarget(const std::string& name) noexcept(false) {
   }
 }
 
-// int ccgo::Optimizer::optimize() {
-//   int lsflag;
-//   double w;
-//   double lam;
-//   Eigen::VectorXd x = getInitialParamVector();
-//   onFitBegin(x);
-//   Eigen::VectorXd xp;
-//   Eigen::VectorXd dx;
-//   Eigen::VectorXd ag;
-//   Eigen::VectorXd agp;
-//   Eigen::VectorXd s;
-//   for (int k = 0; k < _nIter; ++k) {
-//     agp = -df(x);
-//     s = agp;
-//     for (int j = 0; j < _nIter; ++j) {
-//       xp = x;
-//       lam = 0;
-//       lsflag = lsearch(x, s, &lam);
-//       x += lam * s;
-//       ag = -df(x);
-//       if (lsflag) {
-// 	w = 0;
-//       } else {
-// 	w = beta(agp, ag, s);
-//       }
-//       s = ag + w * s;
-//       agp = ag;
-//       dx = x - xp;
-//       if (fabs(f(x) - f(xp)) < _tol) {
-// 	// s.transpose() * s < _tol || dx.transpose() * dx < _tol
-// 	setFinalParameters(x);
-// 	onFitEnd(x);
-// 	_finalX = x;
-// 	return 0;
-//       }
-//     }
-//   }
-//   setFinalParameters(x);
-//   onFitEnd(x);
-//   _finalX = x;
-//   return 1;
-// }
-
 int ccgo::Optimizer::optimize() {
-  int lsflag;
-  double w;
-  double lam;
   Eigen::VectorXd x = getInitialParamVector();
   onFitBegin(x);
   Eigen::VectorXd xp;
-  Eigen::VectorXd ag;
-  Eigen::VectorXd agp;
-  Eigen::VectorXd s;
-  agp = -df(x);
-  s = agp;
-  for (int j = 0; j < _nIter; ++j) {
-    lam = 0;
-    lsflag = lsearch(x, s, &lam);
-    std::cout << "lsflag = " << lsflag << std::endl;
+  for (int i = 0; i < _nIter; ++i) {
     xp = x;
-    x += lam * s;
-    ag = -df(x);
-    if (lsflag) {
-      w = 0;
-    } else {
-      w = beta(agp, ag, s);
-    }
-    s = ag + w * s;
-    agp = ag;
+    x -= d2f(x).inverse() * df(x);
     if (fabs(f(x) - f(xp)) < _tol) {
-      setFinalParameters(x);
       onFitEnd(x);
-      _finalX = x;
       return 0;
     }
   }
-  setFinalParameters(x);
   onFitEnd(x);
-  _finalX = x;
   return 1;
-}
-
-const Eigen::VectorXd& ccgo::Optimizer::getFinalParameters() const {
-  return _finalX;
 }
 
 void ccgo::Optimizer::onFitBegin(const Eigen::VectorXd& x) {
@@ -296,7 +224,13 @@ void ccgo::Optimizer::onFitBegin(const Eigen::VectorXd& x) {
 void ccgo::Optimizer::onFitEnd(const Eigen::VectorXd& x) {
   for (auto& el : _targets) {
     if (el.second->isEnabled()) {
+      el.second->setFinalParameters(x);
       el.second->onFitEnd(x);
+    }
+  }
+  for (auto& el : _constraints) {
+    if (el.second->isEnabled()) {
+      el.second->setLambdaFinal(x);
     }
   }
 }
@@ -339,87 +273,4 @@ Eigen::VectorXd ccgo::Optimizer::getInitialParamVector() const {
     }
   }
   return result;
-}
-
-int ccgo::Optimizer::lsearch(const Eigen::VectorXd& x, const Eigen::VectorXd& s, double* lam) const {
-  if (s.transpose() * s == 0) {
-    return 0;
-  }
-  double up;
-  double down;
-  double del;
-  double plam;
-  Eigen::VectorXd dfVec;
-  for (int i = 0; i < _nIterLS; ++i) {
-    dfVec = df(x + (*lam) * s);
-    if (dfVec.transpose() * dfVec == 0) {
-      return 0;
-    }
-    up = s.transpose() * dfVec;
-    Eigen::MatrixXd d2fM = d2f(x + (*lam) * s);
-    down = s.transpose() * d2fM * s;
-    del = up / down;
-    plam = *lam;
-    *lam -= del;
-    if (fabs(f(x + plam * s) - f(x + (*lam) * s)) < _tolLS) {
-      return 0;
-    }
-  }
-  return 1;
-}
-
-double ccgo::Optimizer::beta_FLETCHER_REEVES(const Eigen::VectorXd& dxp,
-					     const Eigen::VectorXd& dx,
-					     const Eigen::VectorXd& sp) {
-  return ((double)(dx.transpose() * dx)) / ((double)(dxp.transpose() * dxp));
-}
-
-double ccgo::Optimizer::beta_POLAK_RIBIERE(const Eigen::VectorXd& dxp,
-					   const Eigen::VectorXd& dx,
-					   const Eigen::VectorXd& sp) {
- double res = ((double)(dx.transpose() * (dx - dxp))) /
-    ((double)(dxp.transpose() * dxp));
- return std::max(0., res);
-}
-
-double ccgo::Optimizer::beta_HESTENES_STIEFEL(const Eigen::VectorXd& dxp,
-					      const Eigen::VectorXd& dx,
-					      const Eigen::VectorXd& sp) {
-  double res =  -((double)(dx.transpose() * (dx - dxp))) / ((double)(sp.transpose() * (dx - dxp)));
-  return std::max(0., res);
-}
-
-double ccgo::Optimizer::beta_DAI_YUAN(const Eigen::VectorXd& dxp,
-				      const Eigen::VectorXd& dx,
-				      const Eigen::VectorXd& sp) {
-  double res = -((double)(dx.transpose() * dx)) / ((double)(sp.transpose() * (dx - dxp)));
-  return std::max(0., res);
-}
-
-ccgo::BetaWT ccgo::Optimizer::betaByName(const ccgo::STEP_WT& name) {
-  switch (name) {
-  case ccgo::FLETCHER_REEVES:
-    return &ccgo::Optimizer::beta_FLETCHER_REEVES;
-  case ccgo::POLAK_RIBIERE:
-    return &ccgo::Optimizer::beta_POLAK_RIBIERE;
-  case ccgo::HESTENES_STIEFEL:
-    return &ccgo::Optimizer::beta_HESTENES_STIEFEL;
-  case ccgo::DAI_YUAN:
-    return &ccgo::Optimizer::beta_DAI_YUAN;
-  default:
-    return &ccgo::Optimizer::beta_DAI_YUAN;
-  }
-}
-
-void ccgo::Optimizer::setFinalParameters(const Eigen::VectorXd& x) {
-  for (auto& el : _targets) {
-    if (el.second->isEnabled()) {
-      el.second->setFinalParameters(x);
-    }
-  }
-  for (auto& el : _constraints) {
-    if (el.second->isEnabled()) {
-      el.second->setLambdaFinal(x);
-    }
-  }
 }

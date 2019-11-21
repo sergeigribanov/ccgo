@@ -9,14 +9,14 @@ int main(int argc, char* argv[]) {
   ccgo::Optimizer opt;
   opt.addTarget(&q);
   opt.addConstraint(&tc);
-  Eigen::VectorXd x0(2);
+  Eigen::VectorXd x0 = Eigen::VectorXd::Zero(2);
   x0(0) = 1;
   x0(1) = 1;
   q.setInitialParameters(x0);
   opt.enableTarget("q");
   opt.enableConstraint("tc");
   opt.addTargetToConstraint("q", "tc");
-  Eigen::MatrixXd im(2, 2);
+  Eigen::MatrixXd im = Eigen::MatrixXd::Zero(2, 2);
   im(0, 0) = 1;
   im(1, 1) = 1;
   q.setInverseErrorMatrix(im);
