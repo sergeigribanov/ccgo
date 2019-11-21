@@ -27,8 +27,22 @@ int ccgo::Optimizer::getErrorCode() const {
   return _errorCode;
 }
 
-double ccgo::Optimizer::getChiSquare() const {
+double ccgo::Optimizer::getTargetValue() const {
   return _chiSquare;
+}
+
+double ccgo::Optimizer::getTargetValue
+(const std::vector<std::string>& targetNames) const {
+  double result = 0;
+  for (const auto& name : targetNames) {
+    const auto& target = _targets.at(name);
+    if (target->isEnabled()) {
+      result += target->getTargetValue();
+    } else {
+      // TO DO: exception
+    }
+  }
+  return result;
 }
 
 const Eigen::VectorXd&

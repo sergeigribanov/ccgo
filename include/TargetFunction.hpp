@@ -15,6 +15,7 @@ namespace ccgo {
     double f(const Eigen::VectorXd&) const;
     Eigen::VectorXd df(const Eigen::VectorXd&) const;
     Eigen::MatrixXd d2f(const Eigen::VectorXd&) const;
+    double getTargetValue() const;
     void setInitialParameters(const Eigen::VectorXd&);
     void setBeginIndex(const long&);
     void setFinalParameters(const Eigen::VectorXd&);

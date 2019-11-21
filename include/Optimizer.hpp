@@ -1,5 +1,6 @@
 #ifndef __CCGO_OPTIMIZER_HPP__
 #define __CCGO_OPTIMIZER_HPP__
+#include <vector>
 #include "TargetFunction.hpp"
 #include "Constraint.hpp"
 
@@ -11,7 +12,8 @@ namespace ccgo {
     long getN() const;
     long getNTotal() const;
     int getErrorCode() const;
-    double getChiSquare() const;
+    double getTargetValue() const;
+    double getTargetValue(const std::vector<std::string>&) const;
     const Eigen::VectorXd& getInitialParameters(const std::string&) const noexcept(false);
     const Eigen::VectorXd& getFinalParameters(const std::string&) const noexcept(false);
     void addTarget(TargetFunction*) noexcept(false);

@@ -32,6 +32,7 @@ const Eigen::VectorXd& ccgo::TargetFunction::getFinalParameters() const {
 void ccgo::TargetFunction::setInitialParameters(const Eigen::VectorXd& x) {
   if (x.size() == _xInitial.size()) {
     _xInitial = x;
+    _xFinal = x;
   } else {
     // TODO: exception
   }
@@ -57,6 +58,10 @@ Eigen::MatrixXd ccgo::TargetFunction::d2f(const Eigen::VectorXd& x) const {
   result.block(getBeginIndex(), getBeginIndex(), getN(), getN()) =
     ownd2f(x.block(getBeginIndex(), 0, getN(), 1));
   return result;
+}
+
+double ccgo::TargetFunction::getTargetValue() const {
+  return ownf(_xFinal);
 }
 
 void ccgo::TargetFunction::setFinalParameters(const Eigen::VectorXd& x) {
