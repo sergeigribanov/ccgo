@@ -1,4 +1,5 @@
 #include <utility>
+#include <limits>
 #include <iostream>
 #include <math.h>
 #include "NameException.hpp"
@@ -6,7 +7,9 @@
 
 ccgo::Optimizer::Optimizer():
   _n(0), _nTotal(0),
-  _nIter(100), _tol(1.e-9) {
+  _nIter(100), _tol(1.e-9),
+  _chiSquare(std::numeric_limits<double>::infinity()),
+  _errorCode(1) {
 }
 
 ccgo::Optimizer::~Optimizer() {
@@ -18,6 +21,14 @@ long ccgo::Optimizer::getN() const {
 
 long ccgo::Optimizer::getNTotal() const {
   return _nTotal;
+}
+
+int ccgo::Optimizer::getErrorCode() const {
+  return _errorCode;
+}
+
+double ccgo::Optimizer::getChiSquare() const {
+  return _chiSquare;
 }
 
 const Eigen::VectorXd&
@@ -87,6 +98,16 @@ void ccgo::Optimizer::setParameters(const std::string& name,
     throw(e);
   }
   it->second->setInitialParameters(params);
+}
+
+double ccgo::Optimizer::calcChiSquare(const Eigen::VectorXd& x) const {
+  double result = 0;
+  for (const auto& el : _targets) {
+    if (el.second->isEnabled()) {
+      result += el.second->f(x);
+    }
+  }
+  return result;
 }
 
 double ccgo::Optimizer::f(const Eigen::VectorXd& x) const {
@@ -197,7 +218,7 @@ void ccgo::Optimizer::disableTarget(const std::string& name) noexcept(false) {
   }
 }
 
-int ccgo::Optimizer::optimize() {
+void ccgo::Optimizer::optimize() {
   Eigen::VectorXd x = getInitialParamVector();
   onFitBegin(x);
   Eigen::VectorXd xp;
@@ -206,11 +227,13 @@ int ccgo::Optimizer::optimize() {
     x -= d2f(x).inverse() * df(x);
     if (fabs(f(x) - f(xp)) < _tol) {
       onFitEnd(x);
-      return 0;
+      _errorCode = 0;
+      return;
     }
   }
   onFitEnd(x);
-  return 1;
+  _errorCode = 1;
+  return;
 }
 
 void ccgo::Optimizer::onFitBegin(const Eigen::VectorXd& x) {
@@ -233,6 +256,7 @@ void ccgo::Optimizer::onFitEnd(const Eigen::VectorXd& x) {
       el.second->setLambdaFinal(x);
     }
   }
+  _chiSquare = calcChiSquare(x);
 }
 
 void ccgo::Optimizer::incLambdaIndexes(const long& n) {
