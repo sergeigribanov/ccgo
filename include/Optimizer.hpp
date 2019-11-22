@@ -26,7 +26,7 @@ namespace ccgo {
     void disableTarget(const std::string&) noexcept(false);
     void optimize();
   private:
-    double calcChiSquare(const Eigen::VectorXd&) const;
+    double calcTargetValue() const;
     double f(const Eigen::VectorXd&) const;
     Eigen::VectorXd df(const Eigen::VectorXd&) const;
     Eigen::MatrixXd d2f(const Eigen::VectorXd&) const;
