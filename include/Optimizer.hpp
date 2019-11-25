@@ -34,6 +34,7 @@ namespace ccgo {
     void decLambdaIndexes(const long&);
     void decLambdaIndexesByOne(const long&);
     Eigen::VectorXd getInitialParamVector() const;
+    void checkPeriodical(Eigen::VectorXd*) const;
     void onFitBegin(const Eigen::VectorXd&);
     void onFitEnd(const Eigen::VectorXd&);
     long _n;

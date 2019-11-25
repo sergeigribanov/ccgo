@@ -1,3 +1,5 @@
+#include <iostream>
+#include <utility>
 #include "TargetFunction.hpp"
 
 ccgo::TargetFunction::TargetFunction(const std::string& name, const long& n) :
@@ -53,7 +55,7 @@ Eigen::VectorXd ccgo::TargetFunction::df(const Eigen::VectorXd& x) const {
   return result;
 }
 
-Eigen::MatrixXd ccgo::TargetFunction::d2f(const Eigen::VectorXd& x) const {
+Eigen::MatrixXd ccgo::TargetFunction::d2f(const Eigen::VectorXd& x) const {  
   Eigen::MatrixXd result = Eigen::MatrixXd::Zero(x.size(), x.size());
   result.block(getBeginIndex(), getBeginIndex(), getN(), getN()) =
     ownd2f(x.block(getBeginIndex(), 0, getN(), 1));
@@ -68,3 +70,35 @@ void ccgo::TargetFunction::setFinalParameters(const Eigen::VectorXd& x) {
   _xFinal = x.block(getBeginIndex(), 0, getN(), 1);
 }
 
+void ccgo::TargetFunction::setPeriod(long index, double left, double right) {
+  if (right <= left) {
+    // TO DO: exception
+  }
+  if (index < _xInitial.size() && index >= 0) {
+    _periodical.insert(std::make_pair(index, std::make_pair(left, right)));
+  } else {
+    // TO DO: exception
+  }
+}
+
+void ccgo::TargetFunction::checkPeriodical(Eigen::VectorXd* x) const {
+  long index;
+  int nsteps;
+  double period;
+  for (const auto& el : _periodical) {
+    index = _beginIndex + el.first;
+    if ((*x)[index] >= el.second.second) {
+      period = el.second.second - el.second.first;
+      nsteps = ((*x)[index] - el.second.second) / period + 1;
+      (*x)[index] -=  nsteps * period;
+    } else if ((*x)[index] < el.second.first) {
+      period = el.second.second - el.second.first;
+      nsteps = (el.second.first - (*x)[index]) / period + 1;
+      (*x)[index] +=  nsteps * period;
+    }
+  }
+}
+
+bool ccgo::TargetFunction::havePeriodical() const {
+  return _periodical.size() > 0;
+}

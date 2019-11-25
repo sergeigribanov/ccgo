@@ -232,6 +232,14 @@ void ccgo::Optimizer::disableTarget(const std::string& name) noexcept(false) {
   }
 }
 
+void ccgo::Optimizer::checkPeriodical(Eigen::VectorXd* x) const {
+  for (auto& el : _targets) {
+    if (el.second->isEnabled() && el.second->havePeriodical()) {
+      el.second->checkPeriodical(x);
+    }
+  }
+}
+
 void ccgo::Optimizer::optimize() {
   Eigen::VectorXd x = getInitialParamVector();
   onFitBegin(x);
@@ -239,6 +247,7 @@ void ccgo::Optimizer::optimize() {
   for (int i = 0; i < _nIter; ++i) {
     xp = x;
     x -= d2f(x).inverse() * df(x);
+    checkPeriodical(&x);
     if (fabs(f(x) - f(xp)) < _tol) {
       onFitEnd(x);
       _errorCode = 0;
