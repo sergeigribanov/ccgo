@@ -19,6 +19,7 @@ target_include_directories(ccgo-test
   PRIVATE
   ${EIGEN3_INCLUDE_DIR})
 add_library(ccgo SHARED ${LIB_SOURCES})
+set_property(TARGET ccgo PROPERTY CXX_STANDARD 17)
 target_include_directories(ccgo
   PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -29,6 +30,7 @@ set_target_properties(ccgo
 PROPERTIES
 PUBLIC_HEADER "${PUBLIC_HEADERS}")
 install(TARGETS ccgo-test DESTINATION bin)
+set_property(TARGET ccgo-test PROPERTY CXX_STANDARD 17)
 install(TARGETS ccgo
   LIBRARY DESTINATION lib
   PUBLIC_HEADER DESTINATION include/ccgo)
