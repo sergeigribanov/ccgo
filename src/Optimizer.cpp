@@ -7,8 +7,8 @@
 
 ccgo::Optimizer::Optimizer():
   _n(0), _nTotal(0),
-  _nIter(20), _tol(1.e-4),
-  _chiSquare(std::numeric_limits<double>::infinity()),
+  _nIter(20), _tol(1.e-3),
+  _targetValue(std::numeric_limits<double>::infinity()),
   _errorCode(1) {
 }
 
@@ -28,7 +28,7 @@ int ccgo::Optimizer::getErrorCode() const {
 }
 
 double ccgo::Optimizer::getTargetValue() const {
-  return _chiSquare;
+  return _targetValue;
 }
 
 double ccgo::Optimizer::getTargetValue
@@ -114,15 +114,16 @@ void ccgo::Optimizer::setParameters(const std::string& name,
   it->second->setInitialParameters(params);
 }
 
-double ccgo::Optimizer::calcTargetValue() const {
+double ccgo::Optimizer::calcTargetValue(const Eigen::VectorXd& x) const {
   double result = 0;
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
-      result += el.second->getTargetValue();
+      result += el.second->getTargetValue(x);
     }
   }
   return result;
 }
+
 
 double ccgo::Optimizer::f(const Eigen::VectorXd& x) const {
   double result = 0;
@@ -279,7 +280,7 @@ void ccgo::Optimizer::onFitEnd(const Eigen::VectorXd& x) {
       el.second->setLambdaFinal(x);
     }
   }
-  _chiSquare = calcTargetValue();
+  _targetValue = calcTargetValue(x);
 }
 
 void ccgo::Optimizer::incLambdaIndexes(const long& n) {

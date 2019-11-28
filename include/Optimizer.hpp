@@ -26,7 +26,7 @@ namespace ccgo {
     void disableTarget(const std::string&) noexcept(false);
     void optimize();
   private:
-    double calcTargetValue() const;
+    double calcTargetValue(const Eigen::VectorXd&) const;
     double f(const Eigen::VectorXd&) const;
     Eigen::VectorXd df(const Eigen::VectorXd&) const;
     Eigen::MatrixXd d2f(const Eigen::VectorXd&) const;
@@ -41,7 +41,7 @@ namespace ccgo {
     long _nTotal;
     int _nIter;
     double _tol;
-    double _chiSquare;
+    double _targetValue;
     int _errorCode;
     std::unordered_map<std::string, TargetFunction*> _targets;
     std::unordered_map<std::string, Constraint*> _constraints;
