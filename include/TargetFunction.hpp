@@ -1,7 +1,7 @@
 #ifndef __CCGO_TARGETFUNCTION_HPP__
 #define __CCGO_TARGETFUNCTION_HPP__
 #include <utility>
-#include <unordered_map>
+#include <vector>
 #include "Function.hpp"
 
 namespace ccgo {
@@ -19,6 +19,7 @@ namespace ccgo {
     Eigen::VectorXd df(const Eigen::VectorXd&) const;
     Eigen::MatrixXd d2f(const Eigen::VectorXd&) const;
     double getTargetValue() const;
+    double getTargetValue(const Eigen::VectorXd&) const;
     void setInitialParameters(const Eigen::VectorXd&);
     void setBeginIndex(const long&);
     void setFinalParameters(const Eigen::VectorXd&);
@@ -32,7 +33,7 @@ namespace ccgo {
     virtual Eigen::MatrixXd ownd2f(const Eigen::VectorXd&) const = 0;
     Eigen::VectorXd _xInitial;
     Eigen::VectorXd _xFinal;
-    std::unordered_map<long, std::pair<double, double>> _periodical;
+    std::vector<std::pair<long, std::pair<double, double>>> _periodical;
   private:
     long _beginIndex;
   };

@@ -66,6 +66,10 @@ double ccgo::TargetFunction::getTargetValue() const {
   return ownf(_xFinal);
 }
 
+double ccgo::TargetFunction::getTargetValue(const Eigen::VectorXd& x) const {
+  return ownf(x.block(getBeginIndex(), 0, getN(), 1));
+}
+
 void ccgo::TargetFunction::setFinalParameters(const Eigen::VectorXd& x) {
   _xFinal = x.block(getBeginIndex(), 0, getN(), 1);
 }
@@ -75,7 +79,7 @@ void ccgo::TargetFunction::setPeriod(long index, double left, double right) {
     // TO DO: exception
   }
   if (index < _xInitial.size() && index >= 0) {
-    _periodical.insert(std::make_pair(index, std::make_pair(left, right)));
+    _periodical.push_back(std::make_pair(index, std::make_pair(left, right)));
   } else {
     // TO DO: exception
   }
