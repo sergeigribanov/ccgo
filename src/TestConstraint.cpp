@@ -1,7 +1,7 @@
 #include "TestConstraint.hpp"
 
 ccgo::TestConstraint::TestConstraint(const std::string& name, const double& a) :
-  Constraint(name),
+  LagrangeConstraint(name),
   _a(a) {
 }
 

@@ -1,9 +1,9 @@
 #ifndef __CCGO_TESTCONSTRAINT_HPP__
 #define __CCGO_TESTCONSTRAINT_HPP__
-#include "Constraint.hpp"
+#include "LagrangeConstraint.hpp"
 
 namespace ccgo {
-  class TestConstraint : public Constraint {
+  class TestConstraint : public LagrangeConstraint {
   public:
     TestConstraint(const std::string&, const double&);
     virtual ~TestConstraint();

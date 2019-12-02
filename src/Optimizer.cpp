@@ -3,6 +3,7 @@
 #include <iostream>
 #include <math.h>
 #include "NameException.hpp"
+#include "LagrangeConstraint.hpp"
 #include "Optimizer.hpp"
 
 ccgo::Optimizer::Optimizer():
@@ -184,8 +185,11 @@ void ccgo::Optimizer::enableConstraint(const std::string& name) noexcept(false) 
   if (it != _constraints.end()) {
     if (!it->second->isEnabled()) {
       it->second->enable();
-      it->second->setLambdaIndex(_nTotal);
-      _nTotal += 1;
+      auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(it->second);
+      if (lc) {
+	lc->setLambdaIndex(_nTotal);
+	_nTotal += 1;
+      }
     }
   } else {
     ccgo::NameException<ccgo::Constraint> e(name);
@@ -199,8 +203,11 @@ void ccgo::Optimizer::disableConstraint(const std::string& name) noexcept(false)
   if (it != _constraints.end()) {
     if (it->second->isEnabled()) {
       it->second->disable();
-      _nTotal -= 1;
-      decLambdaIndexesByOne(it->second->getLambdaIndex());
+      auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(it->second);
+      if (lc) {
+	_nTotal -= 1;
+	decLambdaIndexesByOne(lc->getLambdaIndex());
+      }
     }
   } else {
     ccgo::NameException<ccgo::Constraint> e(name);
@@ -286,7 +293,10 @@ void ccgo::Optimizer::onFitEnd(const Eigen::VectorXd& x) {
   }
   for (auto& el : _constraints) {
     if (el.second->isEnabled()) {
-      el.second->setLambdaFinal(x);
+      auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(el.second);
+      if (lc) {
+	lc->setLambdaFinal(x);
+      }
     }
   }
   _targetValue = calcTargetValue(x);
@@ -295,7 +305,10 @@ void ccgo::Optimizer::onFitEnd(const Eigen::VectorXd& x) {
 void ccgo::Optimizer::incLambdaIndexes(const long& n) {
   for (auto& el : _constraints) {
     if (el.second->isEnabled()) {
-      el.second->setLambdaIndex(el.second->getLambdaIndex() + n);
+      auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(el.second);
+      if (lc) {
+	lc->setLambdaIndex(lc->getLambdaIndex() + n);
+      }
     }
   }
 }
@@ -303,15 +316,23 @@ void ccgo::Optimizer::incLambdaIndexes(const long& n) {
 void ccgo::Optimizer::decLambdaIndexes(const long& n) {
   for (auto& el : _constraints) {
     if (el.second->isEnabled()) {
-      el.second->setLambdaIndex(el.second->getLambdaIndex() - n);
+      auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(el.second);
+      if (lc) {
+	lc->setLambdaIndex(lc->getLambdaIndex() - n);
+      }
     }
   }
 }
 
 void ccgo::Optimizer::decLambdaIndexesByOne(const long& index) {
   for (auto& el : _constraints) {
-    if (el.second->isEnabled() && el.second->getLambdaIndex() > index) {
-      el.second->setLambdaIndex(el.second->getLambdaIndex() - 1);
+    if (el.second->isEnabled()) {
+      auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(el.second);
+      if (lc) {
+	if (lc->getLambdaIndex() > index) {
+	  lc->setLambdaIndex(lc->getLambdaIndex() - 1);
+	}
+      }
     }
   }
 }
@@ -326,7 +347,10 @@ Eigen::VectorXd ccgo::Optimizer::getInitialParamVector() const {
   }
   for (const auto& el : _constraints) {
     if (el.second->isEnabled()) {
-      result(el.second->getLambdaIndex()) = el.second->getLambdaInitial();
+      auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(el.second);
+      if (lc) {
+	result(lc->getLambdaIndex()) = lc->getLambdaInitial();
+      }
     }
   }
   return result;
