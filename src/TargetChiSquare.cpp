@@ -12,17 +12,17 @@ const Eigen::MatrixXd& ccgo::TargetChiSquare::getInverseErrorMatrix() const {
   return _inverseErrorMatrix;
 }
 
-double ccgo::TargetChiSquare::ownf(const Eigen::VectorXd& x) const {
+double ccgo::TargetChiSquare::f(const Eigen::VectorXd& x) const {
   Eigen::VectorXd dx = x - getInitialParameters();
   return dx.transpose() * _inverseErrorMatrix * dx;
 }
 
-Eigen::VectorXd ccgo::TargetChiSquare::owndf(const Eigen::VectorXd& x) const {
+Eigen::VectorXd ccgo::TargetChiSquare::df(const Eigen::VectorXd& x) const {
   Eigen::VectorXd dx = x - getInitialParameters();
   return 2 * _inverseErrorMatrix * dx;
 }
 
-Eigen::MatrixXd ccgo::TargetChiSquare::ownd2f(const Eigen::VectorXd& x) const {
+Eigen::MatrixXd ccgo::TargetChiSquare::d2f(const Eigen::VectorXd& x) const {
   Eigen::VectorXd dx = x - getInitialParameters();
   return 2 * _inverseErrorMatrix;
 }

@@ -44,34 +44,16 @@ void ccgo::TargetFunction::setBeginIndex(const long& index) {
   _beginIndex = index;
 }
 
-double ccgo::TargetFunction::f(const Eigen::VectorXd& x) const {
-  return ownf(x.block(getBeginIndex(), 0, getN(), 1));
-}
-
-Eigen::VectorXd ccgo::TargetFunction::df(const Eigen::VectorXd& x) const {
-  Eigen::VectorXd result = Eigen::VectorXd::Zero(x.size());
-  result.block(getBeginIndex(), 0, getN(), 1) =
-    owndf(x.block(getBeginIndex(), 0, getN(), 1));
-  return result;
-}
-
-Eigen::MatrixXd ccgo::TargetFunction::d2f(const Eigen::VectorXd& x) const {  
-  Eigen::MatrixXd result = Eigen::MatrixXd::Zero(x.size(), x.size());
-  result.block(getBeginIndex(), getBeginIndex(), getN(), getN()) =
-    ownd2f(x.block(getBeginIndex(), 0, getN(), 1));
-  return result;
-}
-
 double ccgo::TargetFunction::getTargetValue() const {
-  return ownf(_xFinal);
+  return f(_xFinal);
 }
 
-double ccgo::TargetFunction::getTargetValue(const Eigen::VectorXd& x) const {
-  return ownf(x.block(getBeginIndex(), 0, getN(), 1));
+double ccgo::TargetFunction::getTargetValue(const Eigen::VectorXd& xfull) const {
+  return f(xfull.segment(getBeginIndex(), getN()));
 }
 
-void ccgo::TargetFunction::setFinalParameters(const Eigen::VectorXd& x) {
-  _xFinal = x.block(getBeginIndex(), 0, getN(), 1);
+void ccgo::TargetFunction::setFinalParameters(const Eigen::VectorXd& xfull) {
+  _xFinal = xfull.segment(getBeginIndex(), getN());
 }
 
 void ccgo::TargetFunction::setPeriod(long index, double left, double right) {

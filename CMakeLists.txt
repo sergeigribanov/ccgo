@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(CCGO)
 option(EIGEN3_INCLUDE_DIR "Path to the Eigen3 include directory")
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
+set(CMAKE_CXX_FLAGS "-Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 if (NOT EIGEN3_INCLUDE_DIR)
   if (DEFINED ENV{EIGEN3_INCLUDE_DIR})
     set(EIGEN3_INCLUDE_DIR $ENV{EIGEN3_INCLUDE_DIR})

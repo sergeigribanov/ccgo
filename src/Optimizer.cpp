@@ -129,7 +129,8 @@ double ccgo::Optimizer::f(const Eigen::VectorXd& x) const {
   double result = 0;
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
-      result += el.second->f(x);
+      result += el.second->f(x.segment(el.second->getBeginIndex(),
+				       el.second->getN()));
     }
   }
   for (const auto& el : _constraints) {
@@ -144,7 +145,10 @@ Eigen::VectorXd ccgo::Optimizer::df(const Eigen::VectorXd& x) const {
   Eigen::VectorXd result = Eigen::VectorXd::Zero(_nTotal);
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
-      result += el.second->df(x);
+      result.segment(el.second->getBeginIndex(),
+		     el.second->getN()) +=
+	el.second->df(x.segment(el.second->getBeginIndex(),
+				el.second->getN()));
     }
   }
   for (const auto& el : _constraints) {
@@ -159,7 +163,12 @@ Eigen::MatrixXd ccgo::Optimizer::d2f(const Eigen::VectorXd& x) const {
   Eigen::MatrixXd result = Eigen::MatrixXd::Zero(_nTotal, _nTotal);
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
-      result += el.second->d2f(x);
+      result.block(el.second->getBeginIndex(),
+		   el.second->getBeginIndex(),
+		   el.second->getN(),
+		   el.second->getN()) +=
+	el.second->d2f(x.segment(el.second->getBeginIndex(),
+				 el.second->getN()));
     }
   }
   for (const auto& el : _constraints) {
@@ -311,7 +320,7 @@ Eigen::VectorXd ccgo::Optimizer::getInitialParamVector() const {
   Eigen::VectorXd result(_nTotal);
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
-      result.block(el.second->getBeginIndex(), 0, el.second->getN(), 1) =
+      result.segment(el.second->getBeginIndex(), el.second->getN()) =
 	el.second->getInitialParameters();
     } 
   }

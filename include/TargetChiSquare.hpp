@@ -11,10 +11,9 @@ namespace ccgo {
     void setInverseErrorMatrix(const Eigen::MatrixXd&);
     virtual void onFitBegin(const Eigen::VectorXd&) override;
     virtual void onFitEnd(const Eigen::VectorXd&) override;
-  protected:
-    double ownf(const Eigen::VectorXd&) const;
-    virtual Eigen::VectorXd owndf(const Eigen::VectorXd&) const override final;
-    virtual Eigen::MatrixXd ownd2f(const Eigen::VectorXd&) const override final;
+    virtual double f(const Eigen::VectorXd&) const override final;
+    virtual Eigen::VectorXd df(const Eigen::VectorXd&) const override final;
+    virtual Eigen::MatrixXd d2f(const Eigen::VectorXd&) const override final;
   private:
     Eigen::MatrixXd _inverseErrorMatrix;
   };
