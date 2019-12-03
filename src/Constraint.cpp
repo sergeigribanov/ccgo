@@ -21,3 +21,8 @@ const std::unordered_map<std::string, const ccgo::TargetFunction*>&
 ccgo::Constraint::getTargets() const {
   return _targets;
 }
+
+std::unordered_map<std::string, const ccgo::TargetFunction*>&
+ccgo::Constraint::getTargets() {
+  return _targets;
+}
