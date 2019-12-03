@@ -1,3 +1,4 @@
+#include <iostream>
 #include "TestConstraint.hpp"
 
 ccgo::TestConstraint::TestConstraint(const std::string& name, const double& a) :
@@ -13,13 +14,13 @@ double ccgo::TestConstraint::getA() const {
 }
 
 double ccgo::TestConstraint::h(const Eigen::VectorXd& x) const {
-  auto it = _targets.begin();
+  auto it = getTargets().begin();
   long bi = (*it).second->getBeginIndex();
   return x(bi) - _a;
 }
 
 Eigen::VectorXd ccgo::TestConstraint::dh(const Eigen::VectorXd& x) const {
-  auto it = _targets.begin();
+  auto it = getTargets().begin();
   long bi = (*it).second->getBeginIndex();
   Eigen::VectorXd result = Eigen::VectorXd::Zero(x.size());
   result(bi) = 1;

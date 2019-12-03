@@ -13,6 +13,7 @@ namespace ccgo {
     virtual Eigen::VectorXd df(const Eigen::VectorXd&) const = 0;
     virtual Eigen::MatrixXd d2f(const Eigen::VectorXd&) const = 0;
     virtual void add(const TargetFunction*);
+    const std::unordered_map<std::string, const TargetFunction*>& getTargets() const;
   protected:
     std::unordered_map<std::string, const TargetFunction*> _targets;
   };

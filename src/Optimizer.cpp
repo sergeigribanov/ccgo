@@ -146,6 +146,7 @@ Eigen::VectorXd ccgo::Optimizer::df(const Eigen::VectorXd& x) const {
   Eigen::VectorXd result = Eigen::VectorXd::Zero(_nTotal);
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
+     
       result.segment(el.second->getBeginIndex(),
 		     el.second->getN()) +=
 	el.second->df(x.segment(el.second->getBeginIndex(),

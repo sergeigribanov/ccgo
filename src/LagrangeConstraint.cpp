@@ -1,5 +1,4 @@
 #include <utility>
-#include <iostream>
 #include "LagrangeConstraint.hpp"
 
 ccgo::LagrangeConstraint::LagrangeConstraint(const std::string& name) :
