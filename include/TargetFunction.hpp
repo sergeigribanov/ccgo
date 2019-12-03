@@ -4,9 +4,12 @@
 #include <vector>
 #include "Function.hpp"
 #include "ParamContainer.hpp"
+#include "Switch.hpp"
 
 namespace ccgo {
-  class TargetFunction : public Function, public ParamContainer {
+  class TargetFunction : public Function,
+			 public ParamContainer,
+			 public Switch {
   public:
     TargetFunction(const std::string&, const long&);
     virtual ~TargetFunction();

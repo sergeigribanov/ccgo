@@ -60,7 +60,7 @@ ccgo::Optimizer::getInitialParameters(const std::string& name) const noexcept(fa
 const Eigen::VectorXd& ccgo::Optimizer::getFinalParameters(const std::string& name) const noexcept(false){
   auto it = _targets.find(name);
   if (it == _targets.end()) {
-    ccgo::NameException<TargetFunction> e(name);
+    ccgo::NameException<ccgo::TargetFunction> e(name);
     std::cerr << e.what() << std::endl;
     throw(e);
   }
@@ -69,9 +69,10 @@ const Eigen::VectorXd& ccgo::Optimizer::getFinalParameters(const std::string& na
 
 void ccgo::Optimizer::addTarget(TargetFunction* obj) noexcept(false) {
   if (_targets.find(obj->getName()) == _targets.end()) {
+    obj->setCommonParameters(&_commonParams);
     _targets.insert(std::make_pair(obj->getName(), obj));
   } else {
-    ccgo::NameException<TargetFunction> e(obj->getName());
+    ccgo::NameException<ccgo::TargetFunction> e(obj->getName());
     std::cerr << e.what() << std::endl;
     throw(e);
   }
@@ -79,6 +80,7 @@ void ccgo::Optimizer::addTarget(TargetFunction* obj) noexcept(false) {
 
 void ccgo::Optimizer::addConstraint(Constraint* obj) noexcept(false) {
   if (_constraints.find(obj->getName()) == _constraints.end()) {
+    obj->setCommonParameters(&_commonParams);
     _constraints.insert(std::make_pair(obj->getName(), obj));
   } else {
     ccgo::NameException<ccgo::Constraint> e(obj->getName());
@@ -346,6 +348,12 @@ Eigen::VectorXd ccgo::Optimizer::getInitialParamVector() const {
 	el.second->getInitialParameters();
     } 
   }
+  for (const auto& el : _commonParams) {
+    if (el.second->isEnabled()) {
+      result.segment(el.second->getBeginIndex(), el.second->getN()) =
+	el.second->getInitialParameters();
+    }
+  }
   for (const auto& el : _constraints) {
     if (el.second->isEnabled()) {
       auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(el.second);
@@ -355,4 +363,63 @@ Eigen::VectorXd ccgo::Optimizer::getInitialParamVector() const {
     }
   }
   return result;
+}
+
+void ccgo::Optimizer::addCommonParams(ccgo::CommonParams* obj) noexcept(false) {
+  if (_commonParams.find(obj->getName()) == _commonParams.end()) {
+    _commonParams.insert(std::make_pair(obj->getName(), obj));
+  } else {
+    ccgo::NameException<ccgo::CommonParams> e(obj->getName());
+    std::cerr << e.what() << std::endl;
+    throw(e);
+  }
+}
+
+void ccgo::Optimizer::setCommonParameters
+(const std::string& name, const Eigen::VectorXd& params) noexcept(false) {
+  auto it = _commonParams.find(name);
+  if (it == _commonParams.end()) {
+    ccgo::NameException<ccgo::TargetFunction> e(name);
+    std::cerr << e.what() << std::endl;
+    throw(e);
+  }
+  it->second->setInitialParameters(params);
+}
+
+void ccgo::Optimizer::enableCommonParams(const std::string& name) noexcept(false) {
+  auto it = _commonParams.find(name);
+  if (it != _commonParams.end()) {
+    if (!it->second->isEnabled()) {
+      it->second->enable();
+      it->second->setBeginIndex(_n);
+      _n += it->second->getN();
+      _nTotal += it->second->getN();
+      incLambdaIndexes(it->second->getN());
+    }
+  } else {
+    ccgo::NameException<ccgo::CommonParams> e(name);
+    std::cerr << e.what() << std::endl;
+    throw(e);
+  }  
+}
+
+void ccgo::Optimizer::disableCommonParams(const std::string& name) noexcept(false) {
+  auto it = _commonParams.find(name);
+  if (it != _commonParams.end()) {
+    if (it->second->isEnabled()) {
+      it->second->disable();
+      _n -= it->second->getN();
+      _nTotal -= it->second->getN();
+      decLambdaIndexes(it->second->getN());
+    }
+  } else {
+    ccgo::NameException<ccgo::CommonParams> e(name);
+    std::cerr << e.what() << std::endl;
+    throw(e);
+  }
+}
+
+std::unordered_map<std::string, ccgo::CommonParams*>&
+ccgo::Optimizer::getCommonParameters() {
+  return _commonParams;
 }

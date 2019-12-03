@@ -1,25 +1,22 @@
 #include "Function.hpp"
 
 ccgo::Function::Function(const std::string& name):
-  _enabled(false),
   _name(name) {
 }
 
 ccgo::Function::~Function() {
 }
 
-bool ccgo::Function::isEnabled() const {
-  return _enabled;
-}
-
 std::string ccgo::Function::getName() const {
   return _name;
 }
 
-void ccgo::Function::enable() {
-  _enabled = true;
+const std::unordered_map<std::string, ccgo::CommonParams*>*
+ccgo::Function::getCommonParameters() const {
+  return _commonParams;
 }
 
-void ccgo::Function::disable() {
-  _enabled = false;
+void ccgo::Function::setCommonParameters
+(const std::unordered_map<std::string, CommonParams*>* params) {
+  _commonParams = params;
 }

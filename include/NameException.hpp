@@ -3,6 +3,7 @@
 #include <string>
 #include "TargetFunction.hpp"
 #include "Constraint.hpp"
+#include "CommonParams.hpp"
 
 namespace ccgo {
 
@@ -18,5 +19,6 @@ namespace ccgo {
 
   template class NameException<TargetFunction>;
   template class NameException<Constraint>;
+  template class NameException<CommonParams>;
 }
 #endif

@@ -3,9 +3,11 @@
 #include <unordered_map>
 #include "Function.hpp"
 #include "TargetFunction.hpp"
+#include "Switch.hpp"
 
 namespace ccgo {
-  class Constraint : public Function {
+  class Constraint : public Function,
+		     public Switch {
   public:
     explicit Constraint(const std::string&);
     virtual ~Constraint();

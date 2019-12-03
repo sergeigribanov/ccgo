@@ -73,3 +73,4 @@ void ccgo::ParamContainer::checkPeriodical(Eigen::VectorXd* x) const {
 bool ccgo::ParamContainer::havePeriodical() const {
   return _periodical.size() > 0;
 }
+
