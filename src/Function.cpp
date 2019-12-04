@@ -20,3 +20,8 @@ void ccgo::Function::setCommonParameters
 (std::unordered_map<std::string, CommonParams*>* params) {
   _commonParams = params;
 }
+
+void ccgo::Function::setConstants
+(std::unordered_map<std::string, double>* constants) {
+  _constants = constants;
+}

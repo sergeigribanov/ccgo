@@ -9,11 +9,11 @@ namespace ccgo {
     virtual ~TargetChiSquare();
     const Eigen::MatrixXd& getInverseErrorMatrix() const;
     void setInverseErrorMatrix(const Eigen::MatrixXd&);
-    virtual void onFitBegin(const Eigen::VectorXd&) override;
-    virtual void onFitEnd(const Eigen::VectorXd&) override;
     virtual double f(const Eigen::VectorXd&) const override final;
     virtual Eigen::VectorXd df(const Eigen::VectorXd&) const override final;
     virtual Eigen::MatrixXd d2f(const Eigen::VectorXd&) const override final;
+    virtual void onFitBegin(const Eigen::VectorXd&) override;
+    virtual void onFitEnd(const Eigen::VectorXd&) override;
   private:
     Eigen::MatrixXd _inverseErrorMatrix;
   };

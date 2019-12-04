@@ -70,6 +70,7 @@ const Eigen::VectorXd& ccgo::Optimizer::getFinalParameters(const std::string& na
 void ccgo::Optimizer::addTarget(ccgo::TargetFunction* obj) noexcept(false) {
   if (_targets.find(obj->getName()) == _targets.end()) {
     obj->setCommonParameters(&_commonParams);
+    obj->setConstants(&_constants);
     _targets.insert(std::make_pair(obj->getName(), obj));
   } else {
     ccgo::NameException<ccgo::TargetFunction> e(obj->getName());
@@ -81,6 +82,7 @@ void ccgo::Optimizer::addTarget(ccgo::TargetFunction* obj) noexcept(false) {
 void ccgo::Optimizer::addConstraint(ccgo::Constraint* obj) noexcept(false) {
   if (_constraints.find(obj->getName()) == _constraints.end()) {
     obj->setCommonParameters(&_commonParams);
+    obj->setConstants(&_constants);
     _constraints.insert(std::make_pair(obj->getName(), obj));
   } else {
     ccgo::NameException<ccgo::Constraint> e(obj->getName());
@@ -294,6 +296,11 @@ void ccgo::Optimizer::onFitEnd(const Eigen::VectorXd& x) {
       el.second->onFitEnd(x);
     }
   }
+  for (auto& el : _commonParams) {
+    if (el.second->isEnabled()) {
+      el.second->setFinalParameters(x);
+    }
+  }
   for (auto& el : _constraints) {
     if (el.second->isEnabled()) {
       auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(el.second);
@@ -422,4 +429,12 @@ void ccgo::Optimizer::disableCommonParams(const std::string& name) noexcept(fals
 std::unordered_map<std::string, ccgo::CommonParams*>&
 ccgo::Optimizer::getCommonParameters() {
   return _commonParams;
+}
+
+double ccgo::Optimizer::getConstant(const std::string& name) const {
+  return _constants.at(name);
+}
+
+void ccgo::Optimizer::setConstant(const std::string& name, double value) noexcept(false) {
+  _constants.insert(std::make_pair(name, value));
 }
