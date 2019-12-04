@@ -13,11 +13,11 @@ namespace ccgo {
     virtual double f(const Eigen::VectorXd&) const = 0;
     virtual Eigen::VectorXd df(const Eigen::VectorXd&) const = 0;
     virtual Eigen::MatrixXd d2f(const Eigen::VectorXd&) const = 0;
-    const std::unordered_map<std::string, CommonParams*>* getCommonParameters() const;
-    void setCommonParameters(const std::unordered_map<std::string, CommonParams*>*);
+    std::unordered_map<std::string, CommonParams*>* getCommonParameters() const;
+    void setCommonParameters(std::unordered_map<std::string, CommonParams*>*);
   private:
     std::string _name;
-    const std::unordered_map<std::string, CommonParams*>* _commonParams;
+    std::unordered_map<std::string, CommonParams*>* _commonParams;
   };
 }
 

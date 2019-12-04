@@ -67,7 +67,7 @@ const Eigen::VectorXd& ccgo::Optimizer::getFinalParameters(const std::string& na
   return it->second->getFinalParameters();
 }
 
-void ccgo::Optimizer::addTarget(TargetFunction* obj) noexcept(false) {
+void ccgo::Optimizer::addTarget(ccgo::TargetFunction* obj) noexcept(false) {
   if (_targets.find(obj->getName()) == _targets.end()) {
     obj->setCommonParameters(&_commonParams);
     _targets.insert(std::make_pair(obj->getName(), obj));
@@ -78,7 +78,7 @@ void ccgo::Optimizer::addTarget(TargetFunction* obj) noexcept(false) {
   }
 }
 
-void ccgo::Optimizer::addConstraint(Constraint* obj) noexcept(false) {
+void ccgo::Optimizer::addConstraint(ccgo::Constraint* obj) noexcept(false) {
   if (_constraints.find(obj->getName()) == _constraints.end()) {
     obj->setCommonParameters(&_commonParams);
     _constraints.insert(std::make_pair(obj->getName(), obj));
