@@ -14,6 +14,7 @@ namespace ccgo {
     virtual Eigen::VectorXd df(const Eigen::VectorXd&) const = 0;
     virtual Eigen::MatrixXd d2f(const Eigen::VectorXd&) const = 0;
     std::unordered_map<std::string, CommonParams*>* getCommonParameters() const;
+    std::unordered_map<std::string, double>* getConstants() const;
     void setCommonParameters(std::unordered_map<std::string, CommonParams*>*);
     void setConstants(std::unordered_map<std::string, double>*);
   private:

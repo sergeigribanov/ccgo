@@ -25,3 +25,8 @@ void ccgo::Function::setConstants
 (std::unordered_map<std::string, double>* constants) {
   _constants = constants;
 }
+
+std::unordered_map<std::string, double>*
+ccgo::Function::getConstants() const {
+  return _constants;
+}

@@ -431,6 +431,11 @@ ccgo::Optimizer::getCommonParameters() {
   return _commonParams;
 }
 
+const ccgo::CommonParams*
+ccgo::Optimizer::getCommonParameters(const std::string& name) const {
+  return _commonParams.at(name);
+}
+
 double ccgo::Optimizer::getConstant(const std::string& name) const {
   return _constants.at(name);
 }

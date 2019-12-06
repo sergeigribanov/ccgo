@@ -18,6 +18,7 @@ namespace ccgo {
     const Eigen::VectorXd& getInitialParameters(const std::string&) const noexcept(false);
     const Eigen::VectorXd& getFinalParameters(const std::string&) const noexcept(false);
     std::unordered_map<std::string, CommonParams*>& getCommonParameters();
+    const CommonParams* getCommonParameters(const std::string&) const;
     double getConstant(const std::string&) const;
     void addTarget(TargetFunction*) noexcept(false);
     void addConstraint(Constraint*) noexcept(false);
