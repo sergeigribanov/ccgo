@@ -8,7 +8,7 @@
 namespace ccgo {
   class Optimizer {
   public:
-    Optimizer();
+    Optimizer(long, double);
     virtual ~Optimizer();
     long getN() const;
     long getNTotal() const;

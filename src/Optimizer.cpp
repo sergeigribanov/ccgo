@@ -6,9 +6,9 @@
 #include "LagrangeConstraint.hpp"
 #include "Optimizer.hpp"
 
-ccgo::Optimizer::Optimizer():
+ccgo::Optimizer::Optimizer(long nIter, double tolerance):
   _n(0), _nTotal(0),
-  _nIter(20), _tol(1.e-3),
+  _nIter(nIter), _tol(tolerance),
   _targetValue(std::numeric_limits<double>::infinity()),
   _errorCode(1) {
 }
