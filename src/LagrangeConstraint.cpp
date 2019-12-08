@@ -2,7 +2,7 @@
 #include "LagrangeConstraint.hpp"
 
 ccgo::LagrangeConstraint::LagrangeConstraint(const std::string& name) :
-  Constraint(name),
+  ccgo::Constraint(name),
   _lambdaInitial(2),
   _lambdaFinal(2) {
 }
