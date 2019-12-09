@@ -7,9 +7,9 @@ namespace ccgo {
   public:
     explicit LagrangeConstraint(const std::string&);
     virtual ~LagrangeConstraint();
-    virtual double f(const Eigen::VectorXd&) const override final;
-    virtual Eigen::VectorXd df(const Eigen::VectorXd&) const override final;
-    virtual Eigen::MatrixXd d2f(const Eigen::VectorXd&) const override final;
+    virtual double f(const Eigen::VectorXd&) const override = 0;
+    virtual Eigen::VectorXd df(const Eigen::VectorXd&) const override = 0;
+    virtual Eigen::MatrixXd d2f(const Eigen::VectorXd&) const override = 0;
     long getLambdaIndex() const;
     double getLambdaInitial() const;
     double getLambdaFinal() const;
@@ -17,7 +17,6 @@ namespace ccgo {
     void setLambdaInitial(const double&);
     void setLambdaFinal(const Eigen::VectorXd&);
   protected:
-    std::unordered_map<std::string, const TargetFunction*> _targets;
     virtual double h(const Eigen::VectorXd&) const = 0;
     virtual Eigen::VectorXd dh(const Eigen::VectorXd&) const = 0;
     virtual Eigen::MatrixXd d2h(const Eigen::VectorXd&) const = 0;

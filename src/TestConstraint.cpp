@@ -2,7 +2,7 @@
 #include "TestConstraint.hpp"
 
 ccgo::TestConstraint::TestConstraint(const std::string& name, const double& a) :
-  LagrangeConstraint(name),
+  ccgo::EqualityLagrangeConstraint(name),
   _a(a) {
 }
 
