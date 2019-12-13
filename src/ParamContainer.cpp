@@ -16,6 +16,10 @@ long ccgo::ParamContainer::getN() const {
   return _xInitial.size();
 }
 
+long ccgo::ParamContainer::getNFixed() const {
+  return _fixedParams.size();
+}
+
 const Eigen::VectorXd& ccgo::ParamContainer::getInitialParameters() const {
   return _xInitial;
 }
@@ -57,6 +61,9 @@ void ccgo::ParamContainer::checkPeriodical(Eigen::VectorXd* x) const {
   int nsteps;
   double period;
   for (const auto& el : _periodical) {
+    if (isFixedParameter(el.first)) {
+      continue;
+    }
     index = _beginIndex + el.first;
     if ((*x)[index] >= el.second.second) {
       period = el.second.second - el.second.first;
@@ -74,3 +81,25 @@ bool ccgo::ParamContainer::havePeriodical() const {
   return _periodical.size() > 0;
 }
 
+bool ccgo::ParamContainer::isFixedParameter(long index) const {
+  return (_fixedParams.find(index) != _fixedParams.end());
+}
+
+void ccgo::ParamContainer::fixParameter(long index) {
+  if (index >= 0 && index < getN()) {
+    _fixedParams.insert(index);
+  } else {
+    // TO DO : exception
+  }
+}
+
+void ccgo::ParamContainer::releaseParameter(long index) {
+  auto it = _fixedParams.find(index);
+  if (it != _fixedParams.end()) {
+    _fixedParams.erase(it);
+  }
+}
+
+const std::set<long>& ccgo::ParamContainer::getFixedParamIndexes() const {
+  return _fixedParams;
+}

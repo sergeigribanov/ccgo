@@ -162,6 +162,22 @@ Eigen::VectorXd ccgo::Optimizer::df(const Eigen::VectorXd& x) const {
       result += el.second->df(x);
     }
   }
+  for (const auto& el : _targets) {
+    if (el.second->isEnabled()) {
+      for (long index : el.second->getFixedParamIndexes()) {
+	long idx = el.second->getBeginIndex() + index;
+	result(idx) = 0;
+      }
+    }
+  }
+  for (const auto& el : _commonParams) {
+    if (el.second->isEnabled()) {
+      for (long index : el.second->getFixedParamIndexes()) {
+	long idx = el.second->getBeginIndex() + index;
+	result(idx) = 0;
+      }
+    }
+  }
   return result;
 }
 
@@ -180,6 +196,26 @@ Eigen::MatrixXd ccgo::Optimizer::d2f(const Eigen::VectorXd& x) const {
   for (const auto& el : _constraints) {
     if (el.second->isEnabled()) {
       result += el.second->d2f(x);
+    }
+  }
+  for (const auto& el : _targets) {
+    if (el.second->isEnabled()) {
+      for (long index : el.second->getFixedParamIndexes()) {
+	long idx = el.second->getBeginIndex() + index;
+	result.row(idx).setZero();
+	result.col(idx).setZero();
+	result(idx, idx) = 1;
+      }
+    }
+  }
+  for (const auto& el : _commonParams) {
+    if (el.second->isEnabled()) {
+      for (long index : el.second->getFixedParamIndexes()) {
+	long idx = el.second->getBeginIndex() + index;
+	result.row(idx).setZero();
+	result.col(idx).setZero();
+	result(idx, idx) = 1;
+      }
     }
   }
   return result;
