@@ -1,7 +1,8 @@
 #include <iostream>
+
+#include "Optimizer.hpp"
 #include "TargetChiSquare.hpp"
 #include "TestConstraint.hpp"
-#include "Optimizer.hpp"
 
 int main(int argc, char* argv[]) {
   ccgo::TargetChiSquare q("q", 2);

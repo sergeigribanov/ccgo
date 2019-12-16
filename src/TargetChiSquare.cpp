@@ -1,12 +1,12 @@
-#include <iostream>
 #include "TargetChiSquare.hpp"
 
-ccgo::TargetChiSquare::TargetChiSquare(const std::string& name, const long& n):
-  TargetFunction(name, n), _inverseErrorMatrix(Eigen::MatrixXd::Zero(n, n)) {
-}
+#include <iostream>
 
-ccgo::TargetChiSquare::~TargetChiSquare() {
-}
+ccgo::TargetChiSquare::TargetChiSquare(const std::string& name, const long& n)
+    : TargetFunction(name, n),
+      _inverseErrorMatrix(Eigen::MatrixXd::Zero(n, n)) {}
+
+ccgo::TargetChiSquare::~TargetChiSquare() {}
 
 const Eigen::MatrixXd& ccgo::TargetChiSquare::getInverseErrorMatrix() const {
   return _inverseErrorMatrix;
@@ -27,7 +27,8 @@ Eigen::MatrixXd ccgo::TargetChiSquare::d2f(const Eigen::VectorXd& x) const {
   return 2 * _inverseErrorMatrix;
 }
 
-void ccgo::TargetChiSquare::setInverseErrorMatrix(const Eigen::MatrixXd& matrix) {
+void ccgo::TargetChiSquare::setInverseErrorMatrix(
+    const Eigen::MatrixXd& matrix) {
   if (matrix.rows() == matrix.cols() && matrix.rows() == getN()) {
     _inverseErrorMatrix = matrix;
   } else {
@@ -36,8 +37,6 @@ void ccgo::TargetChiSquare::setInverseErrorMatrix(const Eigen::MatrixXd& matrix)
   }
 }
 
-void ccgo::TargetChiSquare::onFitBegin(const Eigen::VectorXd&) {
-}
+void ccgo::TargetChiSquare::onFitBegin(const Eigen::VectorXd&) {}
 
-void ccgo::TargetChiSquare::onFitEnd(const Eigen::VectorXd&) {
-}
+void ccgo::TargetChiSquare::onFitEnd(const Eigen::VectorXd&) {}

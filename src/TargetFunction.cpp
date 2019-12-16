@@ -1,19 +1,16 @@
-#include <iostream>
-#include <utility>
 #include "TargetFunction.hpp"
 
-ccgo::TargetFunction::TargetFunction(const std::string& name, const long& n) :
-  Function(name),
-  ParamContainer(n) {
-}
+#include <iostream>
+#include <utility>
 
-ccgo::TargetFunction::~TargetFunction() {
-}
+ccgo::TargetFunction::TargetFunction(const std::string& name, const long& n)
+    : Function(name), ParamContainer(n) {}
 
-double ccgo::TargetFunction::getTargetValue() const {
-  return f(_xFinal);
-}
+ccgo::TargetFunction::~TargetFunction() {}
 
-double ccgo::TargetFunction::getTargetValue(const Eigen::VectorXd& xfull) const {
+double ccgo::TargetFunction::getTargetValue() const { return f(_xFinal); }
+
+double ccgo::TargetFunction::getTargetValue(
+    const Eigen::VectorXd& xfull) const {
   return f(xfull.segment(getBeginIndex(), getN()));
 }

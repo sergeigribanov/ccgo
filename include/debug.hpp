@@ -1,7 +1,7 @@
 #ifndef __DEBUG_HPP__
 #define __DEBUG_HPP__
-#include <iostream>
 #include <Eigen/Dense>
+#include <iostream>
 
 void vcout(const Eigen::VectorXd& x);
 

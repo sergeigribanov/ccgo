@@ -1,39 +1,34 @@
-#include <utility>
-#include <limits>
-#include <iostream>
-#include <math.h>
-#include "NameException.hpp"
-#include "LagrangeConstraint.hpp"
 #include "Optimizer.hpp"
 
-ccgo::Optimizer::Optimizer(long nIter, double tolerance):
-  _n(0), _nTotal(0),
-  _nIter(nIter), _tol(tolerance),
-  _targetValue(std::numeric_limits<double>::infinity()),
-  _errorCode(1) {
-}
+#include <math.h>
 
-ccgo::Optimizer::~Optimizer() {
-}
+#include <iostream>
+#include <limits>
+#include <utility>
 
-long ccgo::Optimizer::getN() const {
-  return _n;
-}
+#include "LagrangeConstraint.hpp"
+#include "NameException.hpp"
 
-long ccgo::Optimizer::getNTotal() const {
-  return _nTotal;
-}
+ccgo::Optimizer::Optimizer(long nIter, double tolerance)
+    : _n(0),
+      _nTotal(0),
+      _nIter(nIter),
+      _tol(tolerance),
+      _targetValue(std::numeric_limits<double>::infinity()),
+      _errorCode(1) {}
 
-int ccgo::Optimizer::getErrorCode() const {
-  return _errorCode;
-}
+ccgo::Optimizer::~Optimizer() {}
 
-double ccgo::Optimizer::getTargetValue() const {
-  return _targetValue;
-}
+long ccgo::Optimizer::getN() const { return _n; }
 
-double ccgo::Optimizer::getTargetValue
-(const std::vector<std::string>& targetNames) const {
+long ccgo::Optimizer::getNTotal() const { return _nTotal; }
+
+int ccgo::Optimizer::getErrorCode() const { return _errorCode; }
+
+double ccgo::Optimizer::getTargetValue() const { return _targetValue; }
+
+double ccgo::Optimizer::getTargetValue(
+    const std::set<std::string>& targetNames) const {
   double result = 0;
   for (const auto& name : targetNames) {
     const auto& target = _targets.at(name);
@@ -46,8 +41,8 @@ double ccgo::Optimizer::getTargetValue
   return result;
 }
 
-const Eigen::VectorXd&
-ccgo::Optimizer::getInitialParameters(const std::string& name) const noexcept(false) {
+const Eigen::VectorXd& ccgo::Optimizer::getInitialParameters(
+    const std::string& name) const noexcept(false) {
   auto it = _targets.find(name);
   if (it == _targets.end()) {
     ccgo::NameException<ccgo::TargetFunction> e(name);
@@ -57,7 +52,8 @@ ccgo::Optimizer::getInitialParameters(const std::string& name) const noexcept(fa
   return it->second->getInitialParameters();
 }
 
-const Eigen::VectorXd& ccgo::Optimizer::getFinalParameters(const std::string& name) const noexcept(false){
+const Eigen::VectorXd& ccgo::Optimizer::getFinalParameters(
+    const std::string& name) const noexcept(false) {
   auto it = _targets.find(name);
   if (it == _targets.end()) {
     ccgo::NameException<ccgo::TargetFunction> e(name);
@@ -91,8 +87,9 @@ void ccgo::Optimizer::addConstraint(ccgo::Constraint* obj) noexcept(false) {
   }
 }
 
-void ccgo::Optimizer::addTargetToConstraint(const std::string& targetFunctionName,
-					    const std::string& constraintName) noexcept(false) {
+void ccgo::Optimizer::addTargetToConstraint(
+    const std::string& targetFunctionName,
+    const std::string& constraintName) noexcept(false) {
   auto ci = _constraints.find(constraintName);
   auto ti = _targets.find(targetFunctionName);
   if (ti == _targets.end()) {
@@ -108,8 +105,8 @@ void ccgo::Optimizer::addTargetToConstraint(const std::string& targetFunctionNam
   ci->second->add(ti->second);
 }
 
-void ccgo::Optimizer::setParameters(const std::string& name,
-				    const Eigen::VectorXd& params) noexcept(false) {
+void ccgo::Optimizer::setParameters(
+    const std::string& name, const Eigen::VectorXd& params) noexcept(false) {
   auto it = _targets.find(name);
   if (it == _targets.end()) {
     ccgo::NameException<ccgo::TargetFunction> e(name);
@@ -129,13 +126,12 @@ double ccgo::Optimizer::calcTargetValue(const Eigen::VectorXd& x) const {
   return result;
 }
 
-
 double ccgo::Optimizer::f(const Eigen::VectorXd& x) const {
   double result = 0;
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
-      result += el.second->f(x.segment(el.second->getBeginIndex(),
-				       el.second->getN()));
+      result += el.second->f(
+          x.segment(el.second->getBeginIndex(), el.second->getN()));
     }
   }
   for (const auto& el : _constraints) {
@@ -150,11 +146,9 @@ Eigen::VectorXd ccgo::Optimizer::df(const Eigen::VectorXd& x) const {
   Eigen::VectorXd result = Eigen::VectorXd::Zero(_nTotal);
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
-     
-      result.segment(el.second->getBeginIndex(),
-		     el.second->getN()) +=
-	el.second->df(x.segment(el.second->getBeginIndex(),
-				el.second->getN()));
+      result.segment(el.second->getBeginIndex(), el.second->getN()) +=
+          el.second->df(
+              x.segment(el.second->getBeginIndex(), el.second->getN()));
     }
   }
   for (const auto& el : _constraints) {
@@ -165,16 +159,16 @@ Eigen::VectorXd ccgo::Optimizer::df(const Eigen::VectorXd& x) const {
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
       for (long index : el.second->getFixedParamIndexes()) {
-	long idx = el.second->getBeginIndex() + index;
-	result(idx) = 0;
+        long idx = el.second->getBeginIndex() + index;
+        result(idx) = 0;
       }
     }
   }
   for (const auto& el : _commonParams) {
     if (el.second->isEnabled()) {
       for (long index : el.second->getFixedParamIndexes()) {
-	long idx = el.second->getBeginIndex() + index;
-	result(idx) = 0;
+        long idx = el.second->getBeginIndex() + index;
+        result(idx) = 0;
       }
     }
   }
@@ -185,12 +179,10 @@ Eigen::MatrixXd ccgo::Optimizer::d2f(const Eigen::VectorXd& x) const {
   Eigen::MatrixXd result = Eigen::MatrixXd::Zero(_nTotal, _nTotal);
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
-      result.block(el.second->getBeginIndex(),
-		   el.second->getBeginIndex(),
-		   el.second->getN(),
-		   el.second->getN()) +=
-	el.second->d2f(x.segment(el.second->getBeginIndex(),
-				 el.second->getN()));
+      result.block(el.second->getBeginIndex(), el.second->getBeginIndex(),
+                   el.second->getN(), el.second->getN()) +=
+          el.second->d2f(
+              x.segment(el.second->getBeginIndex(), el.second->getN()));
     }
   }
   for (const auto& el : _constraints) {
@@ -201,35 +193,36 @@ Eigen::MatrixXd ccgo::Optimizer::d2f(const Eigen::VectorXd& x) const {
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
       for (long index : el.second->getFixedParamIndexes()) {
-	long idx = el.second->getBeginIndex() + index;
-	result.row(idx).setZero();
-	result.col(idx).setZero();
-	result(idx, idx) = 1;
+        long idx = el.second->getBeginIndex() + index;
+        result.row(idx).setZero();
+        result.col(idx).setZero();
+        result(idx, idx) = 1;
       }
     }
   }
   for (const auto& el : _commonParams) {
     if (el.second->isEnabled()) {
       for (long index : el.second->getFixedParamIndexes()) {
-	long idx = el.second->getBeginIndex() + index;
-	result.row(idx).setZero();
-	result.col(idx).setZero();
-	result(idx, idx) = 1;
+        long idx = el.second->getBeginIndex() + index;
+        result.row(idx).setZero();
+        result.col(idx).setZero();
+        result(idx, idx) = 1;
       }
     }
   }
   return result;
 }
 
-void ccgo::Optimizer::enableConstraint(const std::string& name) noexcept(false) {
+void ccgo::Optimizer::enableConstraint(const std::string& name) noexcept(
+    false) {
   auto it = _constraints.find(name);
   if (it != _constraints.end()) {
     if (!it->second->isEnabled()) {
       it->second->enable();
       auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(it->second);
       if (lc) {
-	lc->setLambdaIndex(_nTotal);
-	_nTotal += 1;
+        lc->setLambdaIndex(_nTotal);
+        _nTotal += 1;
       }
     }
   } else {
@@ -239,15 +232,16 @@ void ccgo::Optimizer::enableConstraint(const std::string& name) noexcept(false) 
   }
 }
 
-void ccgo::Optimizer::disableConstraint(const std::string& name) noexcept(false) {
+void ccgo::Optimizer::disableConstraint(const std::string& name) noexcept(
+    false) {
   auto it = _constraints.find(name);
   if (it != _constraints.end()) {
     if (it->second->isEnabled()) {
       it->second->disable();
       auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(it->second);
       if (lc) {
-	_nTotal -= 1;
-	decLambdaIndexesByOne(lc->getLambdaIndex());
+        _nTotal -= 1;
+        decLambdaIndexesByOne(lc->getLambdaIndex());
       }
     }
   } else {
@@ -341,7 +335,7 @@ void ccgo::Optimizer::onFitEnd(const Eigen::VectorXd& x) {
     if (el.second->isEnabled()) {
       auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(el.second);
       if (lc) {
-	lc->setLambdaFinal(x);
+        lc->setLambdaFinal(x);
       }
     }
   }
@@ -353,7 +347,7 @@ void ccgo::Optimizer::incLambdaIndexes(const long& n) {
     if (el.second->isEnabled()) {
       auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(el.second);
       if (lc) {
-	lc->setLambdaIndex(lc->getLambdaIndex() + n);
+        lc->setLambdaIndex(lc->getLambdaIndex() + n);
       }
     }
   }
@@ -364,7 +358,7 @@ void ccgo::Optimizer::decLambdaIndexes(const long& n) {
     if (el.second->isEnabled()) {
       auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(el.second);
       if (lc) {
-	lc->setLambdaIndex(lc->getLambdaIndex() - n);
+        lc->setLambdaIndex(lc->getLambdaIndex() - n);
       }
     }
   }
@@ -375,9 +369,9 @@ void ccgo::Optimizer::decLambdaIndexesByOne(const long& index) {
     if (el.second->isEnabled()) {
       auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(el.second);
       if (lc) {
-	if (lc->getLambdaIndex() > index) {
-	  lc->setLambdaIndex(lc->getLambdaIndex() - 1);
-	}
+        if (lc->getLambdaIndex() > index) {
+          lc->setLambdaIndex(lc->getLambdaIndex() - 1);
+        }
       }
     }
   }
@@ -388,20 +382,20 @@ Eigen::VectorXd ccgo::Optimizer::getInitialParamVector() const {
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
       result.segment(el.second->getBeginIndex(), el.second->getN()) =
-	el.second->getInitialParameters();
-    } 
+          el.second->getInitialParameters();
+    }
   }
   for (const auto& el : _commonParams) {
     if (el.second->isEnabled()) {
       result.segment(el.second->getBeginIndex(), el.second->getN()) =
-	el.second->getInitialParameters();
+          el.second->getInitialParameters();
     }
   }
   for (const auto& el : _constraints) {
     if (el.second->isEnabled()) {
       auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(el.second);
       if (lc) {
-	result(lc->getLambdaIndex()) = lc->getLambdaInitial();
+        result(lc->getLambdaIndex()) = lc->getLambdaInitial();
       }
     }
   }
@@ -418,8 +412,8 @@ void ccgo::Optimizer::addCommonParams(ccgo::CommonParams* obj) noexcept(false) {
   }
 }
 
-void ccgo::Optimizer::setCommonParameters
-(const std::string& name, const Eigen::VectorXd& params) noexcept(false) {
+void ccgo::Optimizer::setCommonParameters(
+    const std::string& name, const Eigen::VectorXd& params) noexcept(false) {
   auto it = _commonParams.find(name);
   if (it == _commonParams.end()) {
     ccgo::NameException<ccgo::TargetFunction> e(name);
@@ -429,7 +423,8 @@ void ccgo::Optimizer::setCommonParameters
   it->second->setInitialParameters(params);
 }
 
-void ccgo::Optimizer::enableCommonParams(const std::string& name) noexcept(false) {
+void ccgo::Optimizer::enableCommonParams(const std::string& name) noexcept(
+    false) {
   auto it = _commonParams.find(name);
   if (it != _commonParams.end()) {
     if (!it->second->isEnabled()) {
@@ -443,10 +438,11 @@ void ccgo::Optimizer::enableCommonParams(const std::string& name) noexcept(false
     ccgo::NameException<ccgo::CommonParams> e(name);
     std::cerr << e.what() << std::endl;
     throw(e);
-  }  
+  }
 }
 
-void ccgo::Optimizer::disableCommonParams(const std::string& name) noexcept(false) {
+void ccgo::Optimizer::disableCommonParams(const std::string& name) noexcept(
+    false) {
   auto it = _commonParams.find(name);
   if (it != _commonParams.end()) {
     if (it->second->isEnabled()) {
@@ -467,8 +463,8 @@ ccgo::Optimizer::getCommonParameters() {
   return _commonParams;
 }
 
-const ccgo::CommonParams*
-ccgo::Optimizer::getCommonParameters(const std::string& name) const {
+const ccgo::CommonParams* ccgo::Optimizer::getCommonParameters(
+    const std::string& name) const {
   return _commonParams.at(name);
 }
 
@@ -476,6 +472,7 @@ double ccgo::Optimizer::getConstant(const std::string& name) const {
   return _constants.at(name);
 }
 
-void ccgo::Optimizer::setConstant(const std::string& name, double value) noexcept(false) {
+void ccgo::Optimizer::setConstant(const std::string& name,
+                                  double value) noexcept(false) {
   _constants.insert(std::make_pair(name, value));
 }

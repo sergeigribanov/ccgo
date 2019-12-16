@@ -1,24 +1,15 @@
 #include "ParamContainer.hpp"
 
-ccgo::ParamContainer::ParamContainer(const long& n) :
-  _xInitial(Eigen::VectorXd::Zero(n)),
-  _xFinal(Eigen::VectorXd::Zero(n)) {
-}
+ccgo::ParamContainer::ParamContainer(const long& n)
+    : _xInitial(Eigen::VectorXd::Zero(n)), _xFinal(Eigen::VectorXd::Zero(n)) {}
 
-ccgo::ParamContainer::~ParamContainer() {
-}
+ccgo::ParamContainer::~ParamContainer() {}
 
-long ccgo::ParamContainer::getBeginIndex() const {
-  return _beginIndex;
-}
+long ccgo::ParamContainer::getBeginIndex() const { return _beginIndex; }
 
-long ccgo::ParamContainer::getN() const {
-  return _xInitial.size();
-}
+long ccgo::ParamContainer::getN() const { return _xInitial.size(); }
 
-long ccgo::ParamContainer::getNFixed() const {
-  return _fixedParams.size();
-}
+long ccgo::ParamContainer::getNFixed() const { return _fixedParams.size(); }
 
 const Eigen::VectorXd& ccgo::ParamContainer::getInitialParameters() const {
   return _xInitial;
@@ -68,11 +59,11 @@ void ccgo::ParamContainer::checkPeriodical(Eigen::VectorXd* x) const {
     if ((*x)[index] >= el.second.second) {
       period = el.second.second - el.second.first;
       nsteps = ((*x)[index] - el.second.second) / period + 1;
-      (*x)[index] -=  nsteps * period;
+      (*x)[index] -= nsteps * period;
     } else if ((*x)[index] < el.second.first) {
       period = el.second.second - el.second.first;
       nsteps = (el.second.first - (*x)[index]) / period + 1;
-      (*x)[index] +=  nsteps * period;
+      (*x)[index] += nsteps * period;
     }
   }
 }

@@ -1,17 +1,13 @@
-#include <iostream>
 #include "TestConstraint.hpp"
 
-ccgo::TestConstraint::TestConstraint(const std::string& name, const double& a) :
-  ccgo::EqualityLagrangeConstraint(name),
-  _a(a) {
-}
+#include <iostream>
 
-ccgo::TestConstraint::~TestConstraint() {
-}
+ccgo::TestConstraint::TestConstraint(const std::string& name, const double& a)
+    : ccgo::EqualityLagrangeConstraint(name), _a(a) {}
 
-double ccgo::TestConstraint::getA() const {
-  return _a;
-}
+ccgo::TestConstraint::~TestConstraint() {}
+
+double ccgo::TestConstraint::getA() const { return _a; }
 
 double ccgo::TestConstraint::h(const Eigen::VectorXd& x) const {
   auto it = getTargets().begin();
