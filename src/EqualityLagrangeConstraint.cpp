@@ -1,5 +1,6 @@
 #include "EqualityLagrangeConstraint.hpp"
 
+#include <iostream>
 #include <utility>
 
 ccgo::EqualityLagrangeConstraint::EqualityLagrangeConstraint(
@@ -25,9 +26,9 @@ Eigen::MatrixXd ccgo::EqualityLagrangeConstraint::d2f(
   Eigen::MatrixXd result = Eigen::MatrixXd::Zero(x.size(), x.size());
   const long li = getLambdaIndex();
   result = x(li) * d2h(x);
-  result.block(0, li, x.size(), 1) = dh(x);
-  result.block(li, 0, 1, x.size()) =
-      result.block(0, li, x.size(), 1).transpose();
+  Eigen::VectorXd tmpDh = dh(x);
+  result.block(0, li, x.size(), 1) = tmpDh;
+  result.block(li, 0, 1, x.size()) = tmpDh.transpose();
   result(li, li) = 0;
   return result;
 }
