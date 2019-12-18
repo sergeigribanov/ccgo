@@ -2,6 +2,7 @@
 #define __CCGO_FUNCTION_HPP__
 #include <Eigen/Dense>
 #include <string>
+#include <unordered_map>
 
 #include "CommonParams.hpp"
 
