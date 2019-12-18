@@ -22,7 +22,10 @@ class Optimizer {
       noexcept(false);
   std::unordered_map<std::string, CommonParams*>& getCommonParameters();
   const CommonParams* getCommonParameters(const std::string&) const;
-  int getNumberOfEnabledTargets() const;
+  bool isTargetFunctionEnabled(const std::string&) const;
+  bool isCommonParamContainerEnabled(const std::string&) const;
+  bool isConstraintEnabled(const std::string&) const;
+  int getNumberOfEnabledTargetFunctions() const;
   int getNumberOfEnabledConstraints() const;
   int getNumberOfEnabledCommonParamContainers() const;
   double getConstant(const std::string&) const;

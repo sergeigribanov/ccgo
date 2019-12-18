@@ -476,7 +476,7 @@ void ccgo::Optimizer::setConstant(const std::string& name,
   _constants.insert(std::make_pair(name, value));
 }
 
-int ccgo::Optimizer::getNumberOfEnabledTargets() const {
+int ccgo::Optimizer::getNumberOfEnabledTargetFunctions() const {
   int result = 0;
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
@@ -504,4 +504,16 @@ int ccgo::Optimizer::getNumberOfEnabledCommonParamContainers() const {
     }
   }
   return result;
+}
+
+bool ccgo::Optimizer::isTargetFunctionEnabled(const std::string& targetName) const {
+  return _targets.at(targetName)->isEnabled();
+}
+
+bool ccgo::Optimizer::isCommonParamContainerEnabled(const std::string& commonParamName) const {
+  return _commonParams.at(commonParamName)->isEnabled();
+}
+
+bool ccgo::Optimizer::isConstraintEnabled(const std::string& constraintName) const {
+  return _constraints.at(constraintName)->isEnabled();
 }
