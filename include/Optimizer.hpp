@@ -12,9 +12,9 @@ class Optimizer {
   Optimizer(long = 20, double = 1.e-3);
   virtual ~Optimizer();
   long getN() const;
-  long getNTotal() const;
   int getErrorCode() const;
   double getTargetValue() const;
+  double getTargetValue(const std::string&) const;
   double getTargetValue(const std::set<std::string>&) const;
   const Eigen::VectorXd& getInitialParameters(const std::string&) const
       noexcept(false);
@@ -22,6 +22,9 @@ class Optimizer {
       noexcept(false);
   std::unordered_map<std::string, CommonParams*>& getCommonParameters();
   const CommonParams* getCommonParameters(const std::string&) const;
+  int getNumberOfEnabledTargets() const;
+  int getNumberOfEnabledConstraints() const;
+  int getNumberOfEnabledCommonParamContainers() const;
   double getConstant(const std::string&) const;
   void addTarget(TargetFunction*) noexcept(false);
   void addConstraint(Constraint*) noexcept(false);
@@ -46,15 +49,12 @@ class Optimizer {
   double f(const Eigen::VectorXd&) const;
   Eigen::VectorXd df(const Eigen::VectorXd&) const;
   Eigen::MatrixXd d2f(const Eigen::VectorXd&) const;
-  void incLambdaIndexes(const long&);
-  void decLambdaIndexes(const long&);
-  void decLambdaIndexesByOne(const long&);
+  void decIndicies(long, long);
   Eigen::VectorXd getInitialParamVector() const;
   void checkPeriodical(Eigen::VectorXd*) const;
   void onFitBegin(const Eigen::VectorXd&);
   void onFitEnd(const Eigen::VectorXd&);
   long _n;
-  long _nTotal;
   int _nIter;
   double _tol;
   double _targetValue;
