@@ -285,7 +285,12 @@ void ccgo::Optimizer::disableTarget(const std::string& name) noexcept(false) {
 }
 
 void ccgo::Optimizer::checkPeriodical(Eigen::VectorXd* x) const {
-  for (auto& el : _targets) {
+  for (const auto& el : _targets) {
+    if (el.second->isEnabled() && el.second->havePeriodical()) {
+      el.second->checkPeriodical(x);
+    }
+  }
+  for (const auto& el : _commonParams) {
     if (el.second->isEnabled() && el.second->havePeriodical()) {
       el.second->checkPeriodical(x);
     }
