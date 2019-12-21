@@ -4,6 +4,10 @@ The CCGO library has been designed for use in the KFBase kinematic fit package (
 At this moment the optimization method is pretty simple. To find the optimum of the function f(x) the equation grad(f) = 0
 is solved using the Newton method.
 
+## Dependencies
+
+1. Eigen3: http://eigen.tuxfamily.org/index.php?title=Main_Page
+
 ## Installing
 
 1. git clone https://github.com/sergeigribanov/ccgo.git
