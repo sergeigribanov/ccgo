@@ -1,7 +1,37 @@
+/*
+ * CCGO optimizer
+ * See COPYRIGHT file at the top of the source tree.
+ *
+ * This product includes software developed by the
+ * CMD-3 collaboration (https://cmd.inp.nsk.su/).
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ */
+
+/**
+ * @file Optimizer.cpp
+ *
+ * @brief Implementation of Optimizer methods
+ *
+ * @ingroup ccgo
+ *
+ * @author Sergei Gribanov
+ * Contact: ssgribanov@gmail.com
+ *
+ */
+
 #include "Optimizer.hpp"
 
-#include <math.h>
-
+#include <cmath>
 #include <iostream>
 #include <limits>
 #include <utility>
@@ -166,7 +196,7 @@ Eigen::VectorXd ccgo::Optimizer::df(const Eigen::VectorXd& x) const {
   }
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
-      for (long index : el.second->getFixedParamIndexes()) {
+      for (long index : el.second->getFixedParamIndices()) {
         long idx = el.second->getBeginIndex() + index;
         result(idx) = 0;
       }
@@ -174,7 +204,7 @@ Eigen::VectorXd ccgo::Optimizer::df(const Eigen::VectorXd& x) const {
   }
   for (const auto& el : _commonParams) {
     if (el.second->isEnabled()) {
-      for (long index : el.second->getFixedParamIndexes()) {
+      for (long index : el.second->getFixedParamIndices()) {
         long idx = el.second->getBeginIndex() + index;
         result(idx) = 0;
       }
@@ -200,7 +230,7 @@ Eigen::MatrixXd ccgo::Optimizer::d2f(const Eigen::VectorXd& x) const {
   }
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
-      for (long index : el.second->getFixedParamIndexes()) {
+      for (long index : el.second->getFixedParamIndices()) {
         long idx = el.second->getBeginIndex() + index;
         result.row(idx).setZero();
         result.col(idx).setZero();
@@ -210,7 +240,7 @@ Eigen::MatrixXd ccgo::Optimizer::d2f(const Eigen::VectorXd& x) const {
   }
   for (const auto& el : _commonParams) {
     if (el.second->isEnabled()) {
-      for (long index : el.second->getFixedParamIndexes()) {
+      for (long index : el.second->getFixedParamIndices()) {
         long idx = el.second->getBeginIndex() + index;
         result.row(idx).setZero();
         result.col(idx).setZero();
@@ -310,7 +340,7 @@ void ccgo::Optimizer::optimize() {
     xp = x;
     x -= d2f(x).inverse() * df(x);
     checkPeriodical(&x);
-    if (fabs(f(x) - f(xp)) < _tol) {
+    if (std::fabs(f(x) - f(xp)) < _tol) {
       onFitEnd(x);
       _errorCode = 0;
       return;
@@ -457,11 +487,6 @@ void ccgo::Optimizer::disableCommonParams(const std::string& name) noexcept(
   }
 }
 
-std::unordered_map<std::string, ccgo::CommonParams*>&
-ccgo::Optimizer::getCommonParameters() {
-  return _commonParams;
-}
-
 const ccgo::CommonParams* ccgo::Optimizer::getCommonParameters(
     const std::string& name) const {
   return _commonParams.at(name);
@@ -506,14 +531,17 @@ int ccgo::Optimizer::getNumberOfEnabledCommonParamContainers() const {
   return result;
 }
 
-bool ccgo::Optimizer::isTargetFunctionEnabled(const std::string& targetName) const {
+bool ccgo::Optimizer::isTargetFunctionEnabled(
+    const std::string& targetName) const {
   return _targets.at(targetName)->isEnabled();
 }
 
-bool ccgo::Optimizer::isCommonParamContainerEnabled(const std::string& commonParamName) const {
+bool ccgo::Optimizer::isCommonParamContainerEnabled(
+    const std::string& commonParamName) const {
   return _commonParams.at(commonParamName)->isEnabled();
 }
 
-bool ccgo::Optimizer::isConstraintEnabled(const std::string& constraintName) const {
+bool ccgo::Optimizer::isConstraintEnabled(
+    const std::string& constraintName) const {
   return _constraints.at(constraintName)->isEnabled();
 }
