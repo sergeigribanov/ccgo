@@ -43,13 +43,25 @@ class EqualityLagrangeConstraint : public LagrangeConstraint {
   //! A constructor
   /*!
    * @param name (constraint name)
+   *
+   * @param constrainValue (constraint value)
    */
-  explicit EqualityLagrangeConstraint(const std::string&);
+  EqualityLagrangeConstraint(const std::string&, double = 0);
   //! A destructor
   virtual ~EqualityLagrangeConstraint();
+  //! A constraint value getter
+  double getConstraintValue() const;
+  //! A constraint value setter
+  /*!
+   * @param value (constraint value)
+   */
+  void setConstraintValue(double);
   virtual double f(const Eigen::VectorXd&) const override final;
   virtual Eigen::VectorXd df(const Eigen::VectorXd&) const override final;
   virtual Eigen::MatrixXd d2f(const Eigen::VectorXd&) const override final;
+private:
+  //! A constraint value
+  double _constraintValue;
 };
 }  // namespace ccgo
 

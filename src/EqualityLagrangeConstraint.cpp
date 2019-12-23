@@ -34,21 +34,29 @@
 #include <iostream>
 #include <utility>
 
-ccgo::EqualityLagrangeConstraint::EqualityLagrangeConstraint(
-    const std::string& name)
-    : ccgo::LagrangeConstraint(name) {}
+ccgo::EqualityLagrangeConstraint::EqualityLagrangeConstraint
+(const std::string& name, double constraintValue)
+  : ccgo::LagrangeConstraint(name), _constraintValue(constraintValue) {}
 
 ccgo::EqualityLagrangeConstraint::~EqualityLagrangeConstraint() {}
 
 double ccgo::EqualityLagrangeConstraint::f(const Eigen::VectorXd& x) const {
-  return x(getLambdaIndex()) * h(x);
+  return x(getLambdaIndex()) * (h(x) - _constraintValue);
+}
+
+double ccgo::EqualityLagrangeConstraint::getConstraintValue() const {
+  return _constraintValue;
+}
+
+void ccgo::EqualityLagrangeConstraint::setConstraintValue(double value) {
+  _constraintValue = value;
 }
 
 Eigen::VectorXd ccgo::EqualityLagrangeConstraint::df(
     const Eigen::VectorXd& x) const {
   Eigen::VectorXd result = Eigen::VectorXd::Zero(x.size());
   result = x(getLambdaIndex()) * dh(x);
-  result(getLambdaIndex()) = h(x);
+  result(getLambdaIndex()) = h(x) - _constraintValue;
   return result;
 }
 
