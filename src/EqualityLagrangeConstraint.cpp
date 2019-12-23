@@ -34,9 +34,9 @@
 #include <iostream>
 #include <utility>
 
-ccgo::EqualityLagrangeConstraint::EqualityLagrangeConstraint
-(const std::string& name, double constraintValue)
-  : ccgo::LagrangeConstraint(name), _constraintValue(constraintValue) {}
+ccgo::EqualityLagrangeConstraint::EqualityLagrangeConstraint(
+    const std::string& name, double constraintValue)
+    : ccgo::LagrangeConstraint(name), _constraintValue(constraintValue) {}
 
 ccgo::EqualityLagrangeConstraint::~EqualityLagrangeConstraint() {}
 

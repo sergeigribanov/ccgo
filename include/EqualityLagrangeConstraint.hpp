@@ -59,7 +59,8 @@ class EqualityLagrangeConstraint : public LagrangeConstraint {
   virtual double f(const Eigen::VectorXd&) const override final;
   virtual Eigen::VectorXd df(const Eigen::VectorXd&) const override final;
   virtual Eigen::MatrixXd d2f(const Eigen::VectorXd&) const override final;
-private:
+
+ private:
   //! A constraint value
   double _constraintValue;
 };
