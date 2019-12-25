@@ -20,6 +20,7 @@ set(LIB_SOURCES ${SOURCES})
 list(REMOVE_ITEM LIB_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp)
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp)
 add_library(ccgo SHARED ${LIB_SOURCES})
+set_property(TARGET ccgo PROPERTY CXX_STANDARD 11)
 target_include_directories(ccgo
   PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include
