@@ -35,6 +35,7 @@
 #include <Eigen/Dense>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "CommonParams.hpp"
 
@@ -89,8 +90,14 @@ class Function {
    *
    */
   void setConstants(std::unordered_map<std::string, double>*);
+  virtual void updateIndices() = 0;
 
  protected:
+  void addIndex(long);
+  void addIndices(long, long);
+  void removeIndex(long);
+  void removeIndices(long, long);
+  void removeIndices();
   /*!
    * This method returns pointer to unordered map of common parameter pointers
    */
@@ -99,6 +106,7 @@ class Function {
    * This method returns pointer to unordered map of constants
    */
   std::unordered_map<std::string, double>* getConstants() const;
+  const std::unordered_set<long>& getIndices() const;
 
  private:
   /*!
@@ -109,6 +117,7 @@ class Function {
    * Unordered map of constant pointers
    */
   std::unordered_map<std::string, double>* _constants;
+  std::unordered_set<long> _indices;
 };
 }  // namespace ccgo
 

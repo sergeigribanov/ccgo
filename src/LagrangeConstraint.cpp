@@ -57,3 +57,18 @@ void ccgo::LagrangeConstraint::setLambdaInitial(double lambda) {
 void ccgo::LagrangeConstraint::setLambdaFinal(const Eigen::VectorXd& x) {
   _lambdaFinal = x(getLambdaIndex());
 }
+
+void ccgo::LagrangeConstraint::updateIndices() {
+  removeIndices();
+  addIndex(getLambdaIndex());
+  for (const auto& el : getTargets()) {
+    if (el.second->isEnabled()) {
+      addIndices(el.second->getBeginIndex(), el.second->getN());
+    }
+  }
+  for (const auto& el : *getCommonParameters()) {
+    if (el.second->isEnabled()) {
+      addIndices(el.second->getBeginIndex(), el.second->getN());
+    }
+  }
+}

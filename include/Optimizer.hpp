@@ -50,7 +50,7 @@ class Optimizer {
    * @param tolerance (optimization tolerance)
    *
    */
-  Optimizer(long = 20, double = 1.e-3);
+  Optimizer(long = 20, double = 1.e-3, bool = false, double = 1.e-5);
   //! A destructor
   virtual ~Optimizer();
   //! A getter for total number of parameters
@@ -89,6 +89,8 @@ class Optimizer {
    *
    */
   double getTargetValue(const std::set<std::string>&) const;
+  long getMaxNumberOfIterations() const;
+  double getTolerance() const;
   //! A getter for initial parameters of a target function
   /*!
    * @param name (target function name)
@@ -118,6 +120,8 @@ class Optimizer {
    * @param commonParamName (name of common parameters container)
    */
   bool isConstraintEnabled(const std::string&) const;
+  bool isNumericalDerivatives() const;
+  double getNumericalDerivativeStep() const;
   //! A getter for number of enabled target functions
   int getNumberOfEnabledTargetFunctions() const;
   //! A getter for number of enabled constraints
@@ -208,6 +212,12 @@ class Optimizer {
    * @param name (name of a common parameter container)
    */
   void disableCommonParams(const std::string&) noexcept(false);
+  void enableNumericalDerivatives();
+  void disableNumericalDerivatives();
+  void setNumericalDerivativeStep(double);
+  void setTolerance(double);
+  void setMaxNumberOfIterations(long);
+  void prepare();
   //! A method that starts optimization
   void optimize();
 
@@ -273,6 +283,8 @@ class Optimizer {
   double _targetValue;
   //! An error code is 0 in the case of fit convergence and false otherwise
   int _errorCode;
+  bool _numericalDerivatives;
+  double _derivativeStep;
   //! An unordered map of target functions
   std::unordered_map<std::string, TargetFunction*> _targets;
   //! An unordered map of constraints

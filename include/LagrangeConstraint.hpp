@@ -73,6 +73,7 @@ class LagrangeConstraint : public Constraint {
       delete;
   //! Disabling setter of constants
   void setConstants(std::unordered_map<std::string, double>*) = delete;
+  virtual void updateIndices() override;
 
  protected:
   //! A Lagrange constraint

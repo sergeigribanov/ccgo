@@ -60,4 +60,4 @@ std::string NameException<CommonParams>::what() const {
   result.append(_name);
   return result;
 }
-}
+}  // namespace ccgo

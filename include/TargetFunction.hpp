@@ -79,6 +79,7 @@ class TargetFunction : public Function, public ParamContainer, public Switch {
    * @param x (vector of parameters)
    */
   virtual void onFitEnd(const Eigen::VectorXd& x) = 0;
+  virtual void updateIndices() override;
 };
 };  // namespace ccgo
 

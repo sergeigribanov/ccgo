@@ -58,6 +58,7 @@ class Constraint : public Function, public Switch {
    * @param obj (pointer to target function object)
    */
   virtual void add(const TargetFunction*);
+  virtual void updateIndices() override;
 
  protected:
   //! A const getter for unordered map of target functions

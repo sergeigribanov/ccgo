@@ -31,6 +31,8 @@
 
 #include "Function.hpp"
 
+#include <iostream>
+
 ccgo::Function::Function() {}
 
 ccgo::Function::~Function() {}
@@ -41,12 +43,12 @@ ccgo::Function::getCommonParameters() const {
 }
 
 void ccgo::Function::setCommonParameters(
-					 std::unordered_map<std::string, CommonParams*>* params) {
+    std::unordered_map<std::string, CommonParams*>* params) {
   _commonParams = params;
 }
 
 void ccgo::Function::setConstants(
-				  std::unordered_map<std::string, double>* constants) {
+    std::unordered_map<std::string, double>* constants) {
   _constants = constants;
 }
 
@@ -54,10 +56,11 @@ std::unordered_map<std::string, double>* ccgo::Function::getConstants() const {
   return _constants;
 }
 
-Eigen::VectorXd ccgo::Function::dfNumerical(const Eigen::VectorXd& x, double h) const {
+Eigen::VectorXd ccgo::Function::dfNumerical(const Eigen::VectorXd& x,
+                                            double h) const {
   Eigen::VectorXd result = Eigen::VectorXd::Zero(x.size());
   Eigen::VectorXd vh = Eigen::VectorXd::Zero(x.size());
-  for (long index = 0; index < x.size(); ++index) {
+  for (const auto& index : getIndices()) {
     vh(index) = h;
     result(index) = 0.5 * (f(x + vh) - f(x - vh)) / h;
     vh(index) = 0;
@@ -65,22 +68,49 @@ Eigen::VectorXd ccgo::Function::dfNumerical(const Eigen::VectorXd& x, double h) 
   return result;
 }
 
-Eigen::MatrixXd ccgo::Function::d2fNumerical(const Eigen::VectorXd& x, double h) const {
+Eigen::MatrixXd ccgo::Function::d2fNumerical(const Eigen::VectorXd& x,
+                                             double h) const {
   Eigen::MatrixXd result = Eigen::MatrixXd::Zero(x.size(), x.size());
   Eigen::VectorXd vh0 = Eigen::VectorXd::Zero(x.size());
   Eigen::VectorXd vh1 = Eigen::VectorXd::Zero(x.size());
-  for (long index0 = 0; index0 < x.size(); ++index0) {
+  for (const auto& index0 : getIndices()) {
     vh0(index0) = 0.5 * h;
-    result(index0, index0) = (f(x + 2 * vh0) - 2 * f(x) + f(x - 2 * vh0)) / h / h;
-    for (long index1 = index0 + 1; index1 < x.size(); ++index1) {
+    result(index0, index0) =
+        (f(x + 2 * vh0) - 2 * f(x) + f(x - 2 * vh0)) / h / h;
+    for (const auto& index1 : getIndices()) {
+      if (index1 <= index0) continue;
       vh1(index1) = 0.5 * h;
       result(index0, index1) = (f(x + vh0 + vh1) - f(x - vh0 + vh1) -
-				f(x + vh0 - vh1) + f(x -vh0 - vh1)) / h / h;
+                                f(x + vh0 - vh1) + f(x - vh0 - vh1)) /
+                               h / h;
       result(index1, index0) = result(index0, index1);
       vh1(index1) = 0;
     }
     vh0(index0) = 0;
   }
-  
   return result;
 }
+
+const std::unordered_set<long>& ccgo::Function::getIndices() const {
+  return _indices;
+}
+
+void ccgo::Function::addIndex(long index) { _indices.insert(index); }
+
+void ccgo::Function::addIndices(long firstIndex, long n) {
+  long endIndex = firstIndex + n;
+  for (long index = firstIndex; index < endIndex; ++index) {
+    _indices.insert(index);
+  }
+}
+
+void ccgo::Function::removeIndex(long index) { _indices.erase(index); }
+
+void ccgo::Function::removeIndices(long beginIndex, long n) {
+  long endIndex = beginIndex + n;
+  for (long index = beginIndex; index < endIndex; ++index) {
+    _indices.erase(index);
+  }
+}
+
+void ccgo::Function::removeIndices() { _indices.clear(); }

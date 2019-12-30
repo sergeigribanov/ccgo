@@ -56,3 +56,17 @@ std::unordered_map<std::string, const ccgo::TargetFunction*>&
 ccgo::Constraint::getTargets() {
   return _targets;
 }
+
+void ccgo::Constraint::updateIndices() {
+  removeIndices();
+  for (const auto& el : getTargets()) {
+    if (el.second->isEnabled()) {
+      addIndices(el.second->getBeginIndex(), el.second->getN());
+    }
+  }
+  for (const auto& el : *getCommonParameters()) {
+    if (el.second->isEnabled()) {
+      addIndices(el.second->getBeginIndex(), el.second->getN());
+    }
+  }
+}

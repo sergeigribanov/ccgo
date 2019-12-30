@@ -39,12 +39,15 @@
 #include "LagrangeConstraint.hpp"
 #include "NameException.hpp"
 
-ccgo::Optimizer::Optimizer(long nIter, double tolerance)
+ccgo::Optimizer::Optimizer(long nIter, double tolerance,
+                           bool numericalDerivatives, double derivativeStep)
     : _n(0),
       _nIter(nIter),
       _tol(tolerance),
       _targetValue(std::numeric_limits<double>::infinity()),
-      _errorCode(1) {}
+      _errorCode(1),
+      _numericalDerivatives(numericalDerivatives),
+      _derivativeStep(derivativeStep) {}
 
 ccgo::Optimizer::~Optimizer() {}
 
@@ -184,14 +187,25 @@ Eigen::VectorXd ccgo::Optimizer::df(const Eigen::VectorXd& x) const {
   Eigen::VectorXd result = Eigen::VectorXd::Zero(_n);
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
-      result.segment(el.second->getBeginIndex(), el.second->getN()) +=
-          el.second->df(
-              x.segment(el.second->getBeginIndex(), el.second->getN()));
+      if (isNumericalDerivatives()) {
+        result.segment(el.second->getBeginIndex(), el.second->getN()) +=
+            el.second->dfNumerical(
+                x.segment(el.second->getBeginIndex(), el.second->getN()),
+                _derivativeStep);
+      } else {
+        result.segment(el.second->getBeginIndex(), el.second->getN()) +=
+            el.second->df(
+                x.segment(el.second->getBeginIndex(), el.second->getN()));
+      }
     }
   }
   for (const auto& el : _constraints) {
     if (el.second->isEnabled()) {
-      result += el.second->df(x);
+      if (isNumericalDerivatives()) {
+        result += el.second->dfNumerical(x, _derivativeStep);
+      } else {
+        result += el.second->df(x);
+      }
     }
   }
   for (const auto& el : _targets) {
@@ -217,15 +231,27 @@ Eigen::MatrixXd ccgo::Optimizer::d2f(const Eigen::VectorXd& x) const {
   Eigen::MatrixXd result = Eigen::MatrixXd::Zero(_n, _n);
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
-      result.block(el.second->getBeginIndex(), el.second->getBeginIndex(),
-                   el.second->getN(), el.second->getN()) +=
-          el.second->d2f(
-              x.segment(el.second->getBeginIndex(), el.second->getN()));
+      if (isNumericalDerivatives()) {
+        result.block(el.second->getBeginIndex(), el.second->getBeginIndex(),
+                     el.second->getN(), el.second->getN()) +=
+            el.second->d2fNumerical(
+                x.segment(el.second->getBeginIndex(), el.second->getN()),
+                _derivativeStep);
+      } else {
+        result.block(el.second->getBeginIndex(), el.second->getBeginIndex(),
+                     el.second->getN(), el.second->getN()) +=
+            el.second->d2f(
+                x.segment(el.second->getBeginIndex(), el.second->getN()));
+      }
     }
   }
   for (const auto& el : _constraints) {
     if (el.second->isEnabled()) {
-      result += el.second->d2f(x);
+      if (isNumericalDerivatives()) {
+        result += el.second->d2fNumerical(x, _derivativeStep);
+      } else {
+        result += el.second->d2f(x);
+      }
     }
   }
   for (const auto& el : _targets) {
@@ -544,4 +570,41 @@ bool ccgo::Optimizer::isCommonParamContainerEnabled(
 bool ccgo::Optimizer::isConstraintEnabled(
     const std::string& constraintName) const {
   return _constraints.at(constraintName)->isEnabled();
+}
+
+void ccgo::Optimizer::enableNumericalDerivatives() {
+  _numericalDerivatives = true;
+}
+
+void ccgo::Optimizer::disableNumericalDerivatives() {
+  _numericalDerivatives = false;
+}
+
+bool ccgo::Optimizer::isNumericalDerivatives() const {
+  return _numericalDerivatives;
+}
+
+void ccgo::Optimizer::setNumericalDerivativeStep(double step) {
+  _derivativeStep = step;
+}
+
+double ccgo::Optimizer::getNumericalDerivativeStep() const {
+  return _derivativeStep;
+}
+
+void ccgo::Optimizer::setTolerance(double tolerance) { _tol = tolerance; }
+
+void ccgo::Optimizer::setMaxNumberOfIterations(long nIter) { _nIter = nIter; }
+
+double ccgo::Optimizer::getTolerance() const { return _tol; }
+
+long ccgo::Optimizer::getMaxNumberOfIterations() const { return _nIter; }
+
+void ccgo::Optimizer::prepare() {
+  for (const auto& el : _targets) {
+    el.second->updateIndices();
+  }
+  for (const auto& el : _constraints) {
+    el.second->updateIndices();
+  }
 }

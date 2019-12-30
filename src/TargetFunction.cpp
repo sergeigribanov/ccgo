@@ -44,3 +44,8 @@ double ccgo::TargetFunction::getTargetValue() const { return f(_xFinal); }
 double ccgo::TargetFunction::getTargetValue(const Eigen::VectorXd& x) const {
   return f(x.segment(getBeginIndex(), getN()));
 }
+
+void ccgo::TargetFunction::updateIndices() {
+  removeIndices();
+  addIndices(0, getN());
+}
