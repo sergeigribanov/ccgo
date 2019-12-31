@@ -114,3 +114,26 @@ void ccgo::Function::removeIndices(long beginIndex, long n) {
 }
 
 void ccgo::Function::removeIndices() { _indices.clear(); }
+
+void ccgo::Function::includeUsedCommonParameter(const std::string& name) {
+  const auto& it = _commonParams->find(name);
+  if (it != _commonParams->end()) {
+    _usedCommonParams.insert(name);
+  } else {
+    // TO DO : exception
+  }
+}
+
+void ccgo::Function::excludeUsedCommonParameter(const std::string& name) {
+  const auto& it = _commonParams->find(name);
+  if (it != _commonParams->end()) {
+    _usedCommonParams.erase(name);
+  } else {
+    // TO DO : exception
+  }
+}
+
+const std::unordered_set<std::string>& ccgo::Function::getUsedCommonParameters()
+    const {
+  return _usedCommonParams;
+}

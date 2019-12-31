@@ -91,6 +91,8 @@ class Function {
    */
   void setConstants(std::unordered_map<std::string, double>*);
   virtual void updateIndices() = 0;
+  void includeUsedCommonParameter(const std::string&);
+  void excludeUsedCommonParameter(const std::string&);
 
  protected:
   void addIndex(long);
@@ -107,6 +109,7 @@ class Function {
    */
   std::unordered_map<std::string, double>* getConstants() const;
   const std::unordered_set<long>& getIndices() const;
+  const std::unordered_set<std::string>& getUsedCommonParameters() const;
 
  private:
   /*!
@@ -117,6 +120,7 @@ class Function {
    * Unordered map of constant pointers
    */
   std::unordered_map<std::string, double>* _constants;
+  std::unordered_set<std::string> _usedCommonParams;
   std::unordered_set<long> _indices;
 };
 }  // namespace ccgo
