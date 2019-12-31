@@ -256,7 +256,7 @@ class Optimizer {
    */
   void decIndicies(long, long);
   //! A method that returns a vector of initial parameters for enabled objects
-  Eigen::VectorXd getInitialParamVector() const;
+  Eigen::VectorXd getBeginParameterVector() const;
   //! A method used to keep periodical parameters inside the corresponding
   //! limits
   /*!
