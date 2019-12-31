@@ -359,12 +359,13 @@ void ccgo::Optimizer::checkPeriodical(Eigen::VectorXd* x) const {
 }
 
 void ccgo::Optimizer::optimize() {
-  Eigen::VectorXd x = getInitialParamVector();
+  Eigen::VectorXd x = getBeginParameterVector();
   onFitBegin(x);
   Eigen::VectorXd xp;
   for (int i = 0; i < _nIter; ++i) {
     xp = x;
-    x -= d2f(x).inverse() * df(x);
+    // x -= d2f(x).inverse() * df(x);
+    x -= d2f(x).partialPivLu().solve(df(x));
     checkPeriodical(&x);
     if (std::fabs(f(x) - f(xp)) < _tol) {
       onFitEnd(x);
@@ -435,18 +436,18 @@ void ccgo::Optimizer::decIndicies(long index, long n) {
   }
 }
 
-Eigen::VectorXd ccgo::Optimizer::getInitialParamVector() const {
+Eigen::VectorXd ccgo::Optimizer::getBeginParameterVector() const {
   Eigen::VectorXd result(_n);
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
       result.segment(el.second->getBeginIndex(), el.second->getN()) =
-          el.second->getInitialParameters();
+          el.second->getBeginParameters();
     }
   }
   for (const auto& el : _commonParams) {
     if (el.second->isEnabled()) {
       result.segment(el.second->getBeginIndex(), el.second->getN()) =
-          el.second->getInitialParameters();
+          el.second->getBeginParameters();
     }
   }
   for (const auto& el : _constraints) {
