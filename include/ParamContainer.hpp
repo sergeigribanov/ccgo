@@ -94,6 +94,7 @@ class ParamContainer {
    *
    */
   const Eigen::VectorXd& getInitialParameters() const;
+  const Eigen::VectorXd& getBeginParameters() const;
   //! A final parameters getter
   /*!
    * This method returns vector of final parameters that
@@ -154,6 +155,7 @@ class ParamContainer {
    *
    */
   void fixParameter(long);
+  void fixParameter(long, double);
   //! Releasing a parameter
   /*!
    * This method is used to fix a certain parameter
@@ -166,6 +168,7 @@ class ParamContainer {
  protected:
   //! A vector of initial parameters
   Eigen::VectorXd _xInitial;
+  Eigen::VectorXd _xBegin;
   //! A vector of final parameters
   Eigen::VectorXd _xFinal;
   //! Indicies and limits of periodical parameters

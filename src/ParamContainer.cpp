@@ -32,7 +32,9 @@
 #include "ParamContainer.hpp"
 
 ccgo::ParamContainer::ParamContainer(long n)
-    : _xInitial(Eigen::VectorXd::Zero(n)), _xFinal(Eigen::VectorXd::Zero(n)) {}
+    : _xInitial(Eigen::VectorXd::Zero(n)),
+      _xBegin(Eigen::VectorXd::Zero(n)),
+      _xFinal(Eigen::VectorXd::Zero(n)) {}
 
 ccgo::ParamContainer::~ParamContainer() {}
 
@@ -54,6 +56,15 @@ void ccgo::ParamContainer::setInitialParameters(const Eigen::VectorXd& x) {
   if (x.size() == _xInitial.size()) {
     _xInitial = x;
     _xFinal = x;
+    if (_fixedParams.size() == 0) {
+      _xBegin = x;
+      return;
+    }
+    Eigen::VectorXd tx = x;
+    for (const auto& index : _fixedParams) {
+      tx(index) = _xBegin(index);
+    }
+    _xBegin = tx;
   } else {
     // TODO: exception
   }
@@ -113,6 +124,15 @@ void ccgo::ParamContainer::fixParameter(long index) {
   }
 }
 
+void ccgo::ParamContainer::fixParameter(long index, double value) {
+  if (index >= 0 && index < getN()) {
+    _fixedParams.insert(index);
+    _xBegin(index) = value;
+  } else {
+    // TO DO : exception
+  }
+}
+
 void ccgo::ParamContainer::releaseParameter(long index) {
   auto it = _fixedParams.find(index);
   if (it != _fixedParams.end()) {
@@ -122,4 +142,8 @@ void ccgo::ParamContainer::releaseParameter(long index) {
 
 const std::set<long>& ccgo::ParamContainer::getFixedParamIndices() const {
   return _fixedParams;
+}
+
+const Eigen::VectorXd& ccgo::ParamContainer::getBeginParameters() const {
+  return _xBegin;
 }
