@@ -1,0 +1,6 @@
+@PACKAGE_INIT@
+
+include ( "${CMAKE_CURRENT_LIST_DIR}/CCGOTargets.cmake" )
+set(CCGO_ROOT_DIR @CMAKE_INSTALL_PREFIX@)
+set(CCGO_INCLUDE_DIRS ${CCGO_ROOT_DIR}/include)
+set(CCGO_LIBRARIES ${CCGO_ROOT_DIR}/lib/libccgo.so)
