@@ -30,7 +30,7 @@
  */
 
 #include "EqualityLagrangeConstraint.hpp"
-
+#include <cmath>
 #include <iostream>
 #include <utility>
 
@@ -42,6 +42,10 @@ ccgo::EqualityLagrangeConstraint::~EqualityLagrangeConstraint() {}
 
 double ccgo::EqualityLagrangeConstraint::f(const Eigen::VectorXd& x) const {
   return x(getLambdaIndex()) * (h(x) - _constraintValue);
+}
+
+double ccgo::EqualityLagrangeConstraint::calcResidual(const Eigen::VectorXd& x) const {
+  return std::fabs(h(x) - _constraintValue);
 }
 
 double ccgo::EqualityLagrangeConstraint::getConstraintValue() const {

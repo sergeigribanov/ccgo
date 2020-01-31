@@ -37,6 +37,7 @@
 #include <utility>
 
 #include "LagrangeConstraint.hpp"
+#include "EqualityLagrangeConstraint.hpp"
 #include "NameException.hpp"
 
 ccgo::Optimizer::Optimizer(long nIter, double tolerance,
@@ -162,6 +163,19 @@ double ccgo::Optimizer::calcTargetValue(const Eigen::VectorXd& x) const {
   for (const auto& el : _targets) {
     if (el.second->isEnabled()) {
       result += el.second->getTargetValue(x);
+    }
+  }
+  return result;
+}
+
+double ccgo::Optimizer::calcResidual(const Eigen::VectorXd& x) const {
+  double result = 0;
+  for (const auto& el : _constraints) {
+    if (el.second->isEnabled()) {
+      const auto cnt = dynamic_cast<ccgo::EqualityLagrangeConstraint*>(el.second);
+      if (cnt) {
+	result += cnt->calcResidual(x);
+      }
     }
   }
   return result;
@@ -367,7 +381,7 @@ void ccgo::Optimizer::optimize() {
     // x -= d2f(x).inverse() * df(x);
     x -= d2f(x).partialPivLu().solve(df(x));
     checkPeriodical(&x);
-    if (std::fabs(f(x) - f(xp)) < _tol) {
+    if (std::fabs(calcTargetValue(x) - calcTargetValue(xp)) < _tol) {
       onFitEnd(x);
       _errorCode = 0;
       return;

@@ -227,6 +227,7 @@ class Optimizer {
    * @param x (vector of parameters)
    */
   double calcTargetValue(const Eigen::VectorXd&) const;
+  double calcResidual(const Eigen::VectorXd&) const;
   //! A method used to calculate function to be optimized
   /*!
    * @param x (vector of parameters)

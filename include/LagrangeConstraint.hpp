@@ -74,13 +74,12 @@ class LagrangeConstraint : public Constraint {
   //! Disabling setter of constants
   void setConstants(std::unordered_map<std::string, double>*) = delete;
   virtual void updateIndices() override;
-
- protected:
+protected:
   //! A Lagrange constraint
   /*!
    * @param x (vector of parameters)
    */
-  virtual double h(const Eigen::VectorXd& x) const = 0;
+  virtual double h(const Eigen::VectorXd&) const = 0;
   //! A gradient of a Lagrange constraint
   /*!
    * @param x (vector of parameters)
