@@ -66,5 +66,34 @@ template class NameException<TargetFunction>;
 template class NameException<Constraint>;
 //! A name exception for common parameters
 template class NameException<CommonParams>;
+
+template <class T>
+NameException<T>::NameException(const std::string& name) : _name(name) {}
+
+template <class T>
+NameException<T>::~NameException() {}
+
+template <>
+std::string NameException<TargetFunction>::what() const {
+  std::string result = "[ERROR] There is no target function with such name: ";
+  result.append(_name);
+  return result;
+}
+
+template <>
+std::string NameException<Constraint>::what() const {
+  std::string result = "[ERROR] There is no constraint with such name: ";
+  result.append(_name);
+  return result;
+}
+
+template <>
+std::string NameException<CommonParams>::what() const {
+  std::string result =
+      "[ERROR] There is no common params container with such name: ";
+  result.append(_name);
+  return result;
+}
+
 }  // namespace ccgo
 #endif
