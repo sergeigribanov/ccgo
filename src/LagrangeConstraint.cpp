@@ -34,7 +34,7 @@
 #include <utility>
 
 ccgo::LagrangeConstraint::LagrangeConstraint(const std::string& name)
-    : ccgo::Constraint(name), _lambdaInitial(2), _lambdaFinal(2) {}
+  : ccgo::Constraint(name), _lambdaInitial(0), _lambdaFinal(0) {}
 
 ccgo::LagrangeConstraint::~LagrangeConstraint() {}
 
