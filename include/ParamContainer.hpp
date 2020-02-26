@@ -35,7 +35,7 @@
 #include <Eigen/Dense>
 #include <set>
 #include <utility>
-#include <vector>
+#include <unordered_map>
 
 namespace ccgo {
 /**
@@ -72,6 +72,7 @@ class ParamContainer {
    * This method returns indices of fixed parameters
    */
   const std::set<long>& getFixedParamIndices() const;
+  bool haveLimits() const;
   //! Checking for fixed parameters presence
   /*!
    * This method returns true, if there are fixed parameters,
@@ -127,6 +128,9 @@ class ParamContainer {
    *
    */
   void setFinalParameters(const Eigen::VectorXd&);
+  void setLowerLimit(long, double);
+  void setUpperLimit(long, double);
+  void checkLimits(Eigen::VectorXd*) const;
   //! A setter of parameter period
   /*!
    * This method is used to set a parameter period.
@@ -172,7 +176,9 @@ class ParamContainer {
   //! A vector of final parameters
   Eigen::VectorXd _xFinal;
   //! Indicies and limits of periodical parameters
-  std::vector<std::pair<long, std::pair<double, double>>> _periodical;
+  std::unordered_map<long, std::pair<double, double>> _periodical;
+  std::unordered_map<long, double> _lowerLimits;
+  std::unordered_map<long, double> _upperLimits;
 
  private:
   //! A begin index

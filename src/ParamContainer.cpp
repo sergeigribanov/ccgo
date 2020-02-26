@@ -76,12 +76,50 @@ void ccgo::ParamContainer::setFinalParameters(const Eigen::VectorXd& xfull) {
   _xFinal = xfull.segment(getBeginIndex(), getN());
 }
 
+void ccgo::ParamContainer::setLowerLimit(long index, double value) {
+  if (index < _xInitial.size() && index >= 0) {
+    // TO DO : exception if upper limit is lower
+    _lowerLimits.insert(std::make_pair(index, value));
+  } else {
+    // TO DO: exception
+  }
+}
+
+void ccgo::ParamContainer::setUpperLimit(long index, double value) {
+  if (index < _xInitial.size() && index >= 0) {
+    // TO DO : exception if upper limit is lower
+    _upperLimits.insert(std::make_pair(index, value));
+  } else {
+    // TO DO: exception
+  }
+}
+
+void ccgo::ParamContainer::checkLimits(Eigen::VectorXd* x) const {
+  long index;
+  for (const auto& el : _lowerLimits) {
+    if (isFixedParameter(el.first)) {
+      continue;
+    }
+    index = _beginIndex + el.first;
+    if ((*x)[index] < el.second)
+      (*x)[index] = el.second;
+  }
+  for (const auto& el : _upperLimits) {
+    if (isFixedParameter(el.first)) {
+      continue;
+    }
+    index = _beginIndex + el.first;
+    if ((*x)[index] > el.second)
+      (*x)[index] = el.second;
+  }
+}
+
 void ccgo::ParamContainer::setPeriod(long index, double left, double right) {
   if (right <= left) {
     // TO DO: exception
   }
   if (index < _xInitial.size() && index >= 0) {
-    _periodical.push_back(std::make_pair(index, std::make_pair(left, right)));
+    _periodical.insert(std::make_pair(index, std::make_pair(left, right)));
   } else {
     // TO DO: exception
   }
@@ -106,6 +144,10 @@ void ccgo::ParamContainer::checkPeriodical(Eigen::VectorXd* x) const {
       (*x)[index] += nsteps * period;
     }
   }
+}
+
+bool ccgo::ParamContainer::haveLimits() const {
+  return (_lowerLimits.size() > 0) || (_upperLimits.size() > 0);
 }
 
 bool ccgo::ParamContainer::havePeriodical() const {
