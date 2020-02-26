@@ -359,6 +359,19 @@ void ccgo::Optimizer::disableTarget(const std::string& name) noexcept(false) {
   }
 }
 
+void ccgo::Optimizer::checkLimits(Eigen::VectorXd* x) const {
+  for (const auto& el : _targets) {
+    if (el.second->isEnabled() && el.second->haveLimits()) {
+      el.second->checkLimits(x);
+    }
+  }
+  for (const auto& el : _commonParams) {
+    if (el.second->isEnabled() && el.second->haveLimits()) {
+      el.second->checkLimits(x);
+    }
+  }
+}
+
 void ccgo::Optimizer::checkPeriodical(Eigen::VectorXd* x) const {
   for (const auto& el : _targets) {
     if (el.second->isEnabled() && el.second->havePeriodical()) {
@@ -380,8 +393,11 @@ void ccgo::Optimizer::optimize() {
     xp = x;
     // x -= d2f(x).inverse() * df(x);
     x -= d2f(x).partialPivLu().solve(df(x));
+    // x -= d2f(x).completeOrthogonalDecomposition().solve(df(x));
     checkPeriodical(&x);
-    if (std::fabs(calcTargetValue(x) - calcTargetValue(xp)) < _tol) {
+    checkLimits(&x);
+    if (std::fabs(calcTargetValue(x) - calcTargetValue(xp)) < _tol &&
+	calcResidual(x) < _tol) {
       onFitEnd(x);
       _errorCode = 0;
       return;
