@@ -102,7 +102,7 @@ void ccgo::ParamContainer::checkLimits(Eigen::VectorXd* x) const {
     }
     index = _beginIndex + el.first;
     if ((*x)[index] < el.second)
-      (*x)[index] = el.second;
+      (*x)[index] = _xBegin(el.first);
   }
   for (const auto& el : _upperLimits) {
     if (isFixedParameter(el.first)) {
@@ -110,7 +110,7 @@ void ccgo::ParamContainer::checkLimits(Eigen::VectorXd* x) const {
     }
     index = _beginIndex + el.first;
     if ((*x)[index] > el.second)
-      (*x)[index] = el.second;
+      (*x)[index] = _xBegin(el.first);
   }
 }
 
