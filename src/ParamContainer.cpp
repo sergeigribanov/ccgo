@@ -29,12 +29,13 @@
  *
  */
 
+#include <iostream>
 #include "ParamContainer.hpp"
 
-ccgo::ParamContainer::ParamContainer(long n)
-    : _xInitial(Eigen::VectorXd::Zero(n)),
-      _xBegin(Eigen::VectorXd::Zero(n)),
-      _xFinal(Eigen::VectorXd::Zero(n)) {}
+ccgo::ParamContainer::ParamContainer(long n) :
+  _xInitial(Eigen::VectorXd::Zero(n)),
+  _xBegin(Eigen::VectorXd::Zero(n)),
+  _xFinal(Eigen::VectorXd::Zero(n)) {}
 
 ccgo::ParamContainer::~ParamContainer() {}
 
@@ -94,24 +95,30 @@ void ccgo::ParamContainer::setUpperLimit(long index, double value) {
   }
 }
 
-void ccgo::ParamContainer::checkLimits(Eigen::VectorXd* x) const {
+bool ccgo::ParamContainer::checkLimits(Eigen::VectorXd* x) const {
   long index;
+  bool result = false;
   for (const auto& el : _lowerLimits) {
     if (isFixedParameter(el.first)) {
       continue;
     }
     index = _beginIndex + el.first;
-    if ((*x)[index] < el.second)
+    if ((*x)[index] < el.second) {
       (*x)[index] = _xBegin(el.first);
+      result = true;
+    }
   }
   for (const auto& el : _upperLimits) {
     if (isFixedParameter(el.first)) {
       continue;
     }
     index = _beginIndex + el.first;
-    if ((*x)[index] > el.second)
-      (*x)[index] = _xBegin(el.first);
+    if ((*x)[index] > el.second) {
+       (*x)[index] = _xBegin(el.first);
+       result = true;
+    }
   }
+  return result;
 }
 
 void ccgo::ParamContainer::setPeriod(long index, double left, double right) {
@@ -127,21 +134,24 @@ void ccgo::ParamContainer::setPeriod(long index, double left, double right) {
 
 void ccgo::ParamContainer::checkPeriodical(Eigen::VectorXd* x) const {
   long index;
-  int nsteps;
+  long nsteps;
   double period;
+  double delta;
   for (const auto& el : _periodical) {
     if (isFixedParameter(el.first)) {
       continue;
     }
     index = _beginIndex + el.first;
+    period = el.second.second - el.second.first;
     if ((*x)[index] >= el.second.second) {
-      period = el.second.second - el.second.first;
-      nsteps = ((*x)[index] - el.second.second) / period + 1;
+      delta = (*x)[index] - el.second.second;
+      nsteps = (long) (delta / period);
+      nsteps += 1l;
       (*x)[index] -= nsteps * period;
     } else if ((*x)[index] < el.second.first) {
-      period = el.second.second - el.second.first;
-      nsteps = (el.second.first - (*x)[index]) / period + 1;
-      (*x)[index] += nsteps * period;
+      delta = el.second.first - (*x)[index];
+      nsteps = (long) (delta / period);
+      nsteps += 1l;
     }
   }
 }

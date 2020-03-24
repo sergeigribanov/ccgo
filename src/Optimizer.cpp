@@ -35,6 +35,7 @@
 #include <iostream>
 #include <limits>
 #include <utility>
+// #include <fenv.h>
 
 #include "LagrangeConstraint.hpp"
 #include "EqualityLagrangeConstraint.hpp"
@@ -48,7 +49,9 @@ ccgo::Optimizer::Optimizer(long nIter, double tolerance,
       _targetValue(std::numeric_limits<double>::infinity()),
       _errorCode(1),
       _numericalDerivatives(numericalDerivatives),
-      _derivativeStep(derivativeStep) {}
+      _derivativeStep(derivativeStep) {
+  // feenableexcept(FE_INVALID | FE_OVERFLOW);
+}
 
 ccgo::Optimizer::~Optimizer() {}
 
@@ -360,16 +363,29 @@ void ccgo::Optimizer::disableTarget(const std::string& name) noexcept(false) {
 }
 
 void ccgo::Optimizer::checkLimits(Eigen::VectorXd* x) const {
+  bool flag = false;
   for (const auto& el : _targets) {
     if (el.second->isEnabled() && el.second->haveLimits()) {
-      el.second->checkLimits(x);
+      flag = flag || el.second->checkLimits(x);
     }
   }
   for (const auto& el : _commonParams) {
     if (el.second->isEnabled() && el.second->haveLimits()) {
-      el.second->checkLimits(x);
+      flag = flag ||  el.second->checkLimits(x);
     }
   }
+  
+  if (flag) {
+    for (const auto& el : _constraints) {
+      if (el.second->isEnabled()) {
+  	auto lc = dynamic_cast<ccgo::LagrangeConstraint*>(el.second);
+  	if (lc) {
+  	  (*x)(lc->getLambdaIndex()) = 0;
+  	}
+      }
+    }
+  }
+  
 }
 
 void ccgo::Optimizer::checkPeriodical(Eigen::VectorXd* x) const {
@@ -394,8 +410,8 @@ void ccgo::Optimizer::optimize() {
     // x -= d2f(x).inverse() * df(x);
     x -= d2f(x).partialPivLu().solve(df(x));
     // x -= d2f(x).completeOrthogonalDecomposition().solve(df(x));
-    checkPeriodical(&x);
     checkLimits(&x);
+    checkPeriodical(&x);
     if (std::fabs(calcTargetValue(x) - calcTargetValue(xp)) < _tol &&
 	calcResidual(x) < _tol) {
       onFitEnd(x);

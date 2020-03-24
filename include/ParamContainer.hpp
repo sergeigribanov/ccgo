@@ -130,7 +130,7 @@ class ParamContainer {
   void setFinalParameters(const Eigen::VectorXd&);
   void setLowerLimit(long, double);
   void setUpperLimit(long, double);
-  void checkLimits(Eigen::VectorXd*) const;
+  bool checkLimits(Eigen::VectorXd*) const;
   //! A setter of parameter period
   /*!
    * This method is used to set a parameter period.
