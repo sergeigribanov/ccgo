@@ -40,7 +40,10 @@ ccgo::EqualityLagrangeConstraint::EqualityLagrangeConstraint(
 
 ccgo::EqualityLagrangeConstraint::~EqualityLagrangeConstraint() {}
 
-double ccgo::EqualityLagrangeConstraint::f(const Eigen::VectorXd& x) const {
+double ccgo::EqualityLagrangeConstraint::f(const Eigen::VectorXd& x, bool recalc) const {
+  if (!recalc) {
+    return getCurF();
+  }
   return x(getLambdaIndex()) * (h(x) - _constraintValue);
 }
 
@@ -57,7 +60,10 @@ void ccgo::EqualityLagrangeConstraint::setConstraintValue(double value) {
 }
 
 Eigen::VectorXd ccgo::EqualityLagrangeConstraint::df(
-    const Eigen::VectorXd& x) const {
+						     const Eigen::VectorXd& x, bool recalc) const {
+  if (!recalc) {
+    return getCurDF();
+  }
   Eigen::VectorXd result = Eigen::VectorXd::Zero(x.size());
   result = x(getLambdaIndex()) * dh(x);
   result(getLambdaIndex()) = h(x) - _constraintValue;
@@ -65,7 +71,10 @@ Eigen::VectorXd ccgo::EqualityLagrangeConstraint::df(
 }
 
 Eigen::MatrixXd ccgo::EqualityLagrangeConstraint::d2f(
-    const Eigen::VectorXd& x) const {
+						      const Eigen::VectorXd& x, bool recalc) const {
+  if (!recalc) {
+    return getCurD2F();
+  }
   Eigen::MatrixXd result = Eigen::MatrixXd::Zero(x.size(), x.size());
   const long li = getLambdaIndex();
   result = x(li) * d2h(x);
@@ -75,3 +84,4 @@ Eigen::MatrixXd ccgo::EqualityLagrangeConstraint::d2f(
   result(li, li) = 0;
   return result;
 }
+

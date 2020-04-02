@@ -57,9 +57,10 @@ class TargetChiSquare : public TargetFunction {
    * @param matrix (inverse error matrix)
    */
   void setInverseErrorMatrix(const Eigen::MatrixXd&);
-  virtual double f(const Eigen::VectorXd&) const override final;
-  virtual Eigen::VectorXd df(const Eigen::VectorXd&) const override final;
-  virtual Eigen::MatrixXd d2f(const Eigen::VectorXd&) const override final;
+  virtual double f(const Eigen::VectorXd&, bool = false) const override final;
+  virtual Eigen::VectorXd df(const Eigen::VectorXd&, bool = false) const override final;
+  virtual Eigen::MatrixXd d2f(const Eigen::VectorXd&,
+			      bool = false) const override final;
   virtual void onFitBegin(const Eigen::VectorXd&) override;
   virtual void onFitEnd(const Eigen::VectorXd&) override;
   void setCommonParameters(std::unordered_map<std::string, CommonParams*>*) =

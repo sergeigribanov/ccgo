@@ -56,8 +56,7 @@ std::unordered_map<std::string, double>* ccgo::Function::getConstants() const {
   return _constants;
 }
 
-Eigen::VectorXd ccgo::Function::dfNumerical(const Eigen::VectorXd& x,
-                                            double h) const {
+Eigen::VectorXd ccgo::Function::dfNumerical(const Eigen::VectorXd& x, double h) const {
   Eigen::VectorXd result = Eigen::VectorXd::Zero(x.size());
   Eigen::VectorXd vh = Eigen::VectorXd::Zero(x.size());
   for (const auto& index : getIndices()) {
@@ -68,8 +67,7 @@ Eigen::VectorXd ccgo::Function::dfNumerical(const Eigen::VectorXd& x,
   return result;
 }
 
-Eigen::MatrixXd ccgo::Function::d2fNumerical(const Eigen::VectorXd& x,
-                                             double h) const {
+Eigen::MatrixXd ccgo::Function::d2fNumerical(const Eigen::VectorXd& x, double h) const {
   Eigen::MatrixXd result = Eigen::MatrixXd::Zero(x.size(), x.size());
   Eigen::VectorXd vh0 = Eigen::VectorXd::Zero(x.size());
   Eigen::VectorXd vh1 = Eigen::VectorXd::Zero(x.size());
@@ -136,4 +134,22 @@ void ccgo::Function::excludeUsedCommonParameter(const std::string& name) {
 const std::unordered_set<std::string>& ccgo::Function::getUsedCommonParameters()
     const {
   return _usedCommonParams;
+}
+
+void ccgo::Function::updateValue(const Eigen::VectorXd& x) {
+  _cur_f = this->f(x, true);
+  _cur_df = this->df(x, true);
+  _cur_d2f = this->d2f(x, true);
+}
+
+double ccgo::Function::getCurF() const {
+  return _cur_f;
+}
+
+const Eigen::VectorXd& ccgo::Function::getCurDF() const {
+  return _cur_df;
+}
+
+const Eigen::MatrixXd& ccgo::Function::getCurD2F() const {
+  return _cur_d2f;
 }

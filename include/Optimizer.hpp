@@ -220,6 +220,7 @@ class Optimizer {
   void prepare();
   //! A method that starts optimization
   void optimize();
+  void updateValues(const Eigen::VectorXd&);
 
  private:
   //! A method used to claculate target value

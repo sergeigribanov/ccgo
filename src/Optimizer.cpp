@@ -408,6 +408,7 @@ void ccgo::Optimizer::optimize() {
   for (int i = 0; i < _nIter; ++i) {
     xp = x;
     // x -= d2f(x).inverse() * df(x);
+    updateValues(x);
     x -= d2f(x).partialPivLu().solve(df(x));
     // x -= d2f(x).completeOrthogonalDecomposition().solve(df(x));
     checkLimits(&x);
@@ -653,5 +654,19 @@ void ccgo::Optimizer::prepare() {
   }
   for (const auto& el : _constraints) {
     el.second->updateIndices();
+  }
+}
+
+
+void ccgo::Optimizer::updateValues(const Eigen::VectorXd& x) {
+  for (const auto& el : _targets) {
+    if (el.second->isEnabled()) {
+      el.second->updateValue(x.segment(el.second->getBeginIndex(), el.second->getN()));
+    }
+  }
+  for (const auto& el : _constraints) {
+    if (el.second->isEnabled()) {
+      el.second->updateValue(x);
+    }
   }
 }

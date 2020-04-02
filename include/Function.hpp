@@ -45,35 +45,38 @@ namespace ccgo {
  * that introduced in order to get a value, a gradient or a
  * hessian of a some function
  */
-class Function {
- public:
-  //! A constructor
-  Function();
-  //! A destructor
-  virtual ~Function();
-  /*!
-   * This method returns a function value
-   *
-   * @param x (vector of parameters)
+  class Function {
+  public:
+    //! A constructor
+    Function();
+    //! A destructor
+    virtual ~Function();
+    /*!
+     * This method returns a function value
+     *
+     * @param x (vector of parameters)
    *
    */
-  virtual double f(const Eigen::VectorXd& x) const = 0;
+    virtual double f(const Eigen::VectorXd& x,
+		     bool = false) const = 0;
   /*!
    * This method returns a function gradient
    *
    * @param x (vector of parameters)
    *
    */
-  virtual Eigen::VectorXd df(const Eigen::VectorXd& x) const = 0;
+    virtual Eigen::VectorXd df(const Eigen::VectorXd& x,
+			       bool = false) const = 0;
   /*!
    * This method returns a function hessian
    *
    * @param x (vector of parameters)
    *
    */
-  virtual Eigen::MatrixXd d2f(const Eigen::VectorXd& x) const = 0;
-  virtual Eigen::VectorXd dfNumerical(const Eigen::VectorXd&, double) const;
-  virtual Eigen::MatrixXd d2fNumerical(const Eigen::VectorXd&, double) const;
+    virtual Eigen::MatrixXd d2f(const Eigen::VectorXd& x,
+				bool = false) const = 0;
+    virtual Eigen::VectorXd dfNumerical(const Eigen::VectorXd&, double) const;
+    virtual Eigen::MatrixXd d2fNumerical(const Eigen::VectorXd&, double) const;
   /*!
    * This method assigns an unordered map of common parameter pointers.
    * Key value of a map is a name of a common parameter container.
@@ -90,16 +93,20 @@ class Function {
    *
    */
   void setConstants(std::unordered_map<std::string, double>*);
-  virtual void updateIndices() = 0;
+    virtual void updateIndices() = 0;
   void includeUsedCommonParameter(const std::string&);
-  void excludeUsedCommonParameter(const std::string&);
-
+    void excludeUsedCommonParameter(const std::string&);
+    void updateValue(const Eigen::VectorXd&);
+    
  protected:
   void addIndex(long);
   void addIndices(long, long);
   void removeIndex(long);
   void removeIndices(long, long);
   void removeIndices();
+  double getCurF() const;
+  const Eigen::VectorXd& getCurDF() const;
+  const Eigen::MatrixXd& getCurD2F() const;
   /*!
    * This method returns pointer to unordered map of common parameter pointers
    */
@@ -122,6 +129,9 @@ class Function {
   std::unordered_map<std::string, double>* _constants;
   std::unordered_set<std::string> _usedCommonParams;
   std::unordered_set<long> _indices;
+  double _cur_f;
+  Eigen::VectorXd _cur_df;
+  Eigen::MatrixXd _cur_d2f;
 };
 }  // namespace ccgo
 

@@ -43,17 +43,26 @@ const Eigen::MatrixXd& ccgo::TargetChiSquare::getInverseErrorMatrix() const {
   return _inverseErrorMatrix;
 }
 
-double ccgo::TargetChiSquare::f(const Eigen::VectorXd& x) const {
+double ccgo::TargetChiSquare::f(const Eigen::VectorXd& x, bool recalc) const {
+  if (!recalc) {
+    return getCurF();
+  }
   Eigen::VectorXd dx = x - getInitialParameters();
   return dx.transpose() * _inverseErrorMatrix * dx;
 }
 
-Eigen::VectorXd ccgo::TargetChiSquare::df(const Eigen::VectorXd& x) const {
+Eigen::VectorXd ccgo::TargetChiSquare::df(const Eigen::VectorXd& x, bool recalc) const {
+  if (!recalc) {
+    return getCurDF();
+  }
   Eigen::VectorXd dx = x - getInitialParameters();
   return 2 * _inverseErrorMatrix * dx;
 }
 
-Eigen::MatrixXd ccgo::TargetChiSquare::d2f(const Eigen::VectorXd& x) const {
+Eigen::MatrixXd ccgo::TargetChiSquare::d2f(const Eigen::VectorXd& x, bool recalc) const {
+  if (!recalc) {
+    return getCurD2F();
+  }
   Eigen::VectorXd dx = x - getInitialParameters();
   return 2 * _inverseErrorMatrix;
 }
