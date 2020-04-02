@@ -659,14 +659,16 @@ void ccgo::Optimizer::prepare() {
 
 
 void ccgo::Optimizer::updateValues(const Eigen::VectorXd& x) {
-  for (const auto& el : _targets) {
-    if (el.second->isEnabled()) {
-      el.second->updateValue(x.segment(el.second->getBeginIndex(), el.second->getN()));
+  if (!isNumericalDerivatives()) {
+    for (const auto& el : _targets) {
+      if (el.second->isEnabled()) {
+	el.second->updateValue(x.segment(el.second->getBeginIndex(), el.second->getN()));
+      }
     }
-  }
-  for (const auto& el : _constraints) {
-    if (el.second->isEnabled()) {
-      el.second->updateValue(x);
+    for (const auto& el : _constraints) {
+      if (el.second->isEnabled()) {
+	el.second->updateValue(x);
+      }
     }
   }
 }
