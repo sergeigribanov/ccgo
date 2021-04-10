@@ -38,6 +38,7 @@
 // #include <fenv.h>
 
 #include "LagrangeConstraint.hpp"
+#include "NonLagrangeConstraint.hpp"
 #include "EqualityLagrangeConstraint.hpp"
 #include "NameException.hpp"
 
@@ -168,6 +169,14 @@ double ccgo::Optimizer::calcTargetValue(const Eigen::VectorXd& x) const {
       result += el.second->getTargetValue(x);
     }
   }
+  for (const auto& el : _constraints) {
+    if (el.second->isEnabled()) {
+      const auto cnt = dynamic_cast<ccgo::NonLagrangeConstraint*>(el.second);
+      if (cnt) {
+        result += el.second->f(x);
+      }
+    }
+  }
   return result;
 }
 
@@ -177,7 +186,7 @@ double ccgo::Optimizer::calcResidual(const Eigen::VectorXd& x) const {
     if (el.second->isEnabled()) {
       const auto cnt = dynamic_cast<ccgo::EqualityLagrangeConstraint*>(el.second);
       if (cnt) {
-	result += cnt->calcResidual(x);
+        result += cnt->calcResidual(x);
       }
     }
   }
@@ -662,12 +671,12 @@ void ccgo::Optimizer::updateValues(const Eigen::VectorXd& x) {
   if (!isNumericalDerivatives()) {
     for (const auto& el : _targets) {
       if (el.second->isEnabled()) {
-	el.second->updateValue(x.segment(el.second->getBeginIndex(), el.second->getN()));
+        el.second->updateValue(x.segment(el.second->getBeginIndex(), el.second->getN()));
       }
     }
     for (const auto& el : _constraints) {
       if (el.second->isEnabled()) {
-	el.second->updateValue(x);
+        el.second->updateValue(x);
       }
     }
   }
